@@ -5,6 +5,7 @@
 
 ## Что внутри
 - **`kantareller_sverige.html`** — самостоятельная интерактивная страница (карта + графики + гид).
+- **`index.html`** — копия страницы для GitHub Pages (точка входа).
 
 ## Карта — три слоя
 - 📍 **22 конкретных места** (нацпарки, природные резерваты, известные грибные леса) с описанием
@@ -22,9 +23,9 @@
 Открой `kantareller_sverige.html` в браузере. Для карты и графиков нужен интернет
 (подгружаются тайлы карты, слой плотности GBIF и библиотека графиков).
 
-## GitHub Pages (по желанию)
+## GitHub Pages
 Settings → Pages → ветка `main`. Страница будет доступна по адресу
-`https://<user>.github.io/<repo>/kantareller_sverige.html`
+`https://work-dis.github.io/sweden/`
 
 ## Источники
 GBIF (Artportalen), Naturvårdsverket (Allemansrätten), Svampindex, Naturhistoriska riksmuseet, SVT.
