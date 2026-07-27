@@ -839,6 +839,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <a href="https://lansstyrelsen.se/varmland/besoksmal/naturreservat-i-varmlands-lan/nordbyberget.html">Länsstyrelsen Värmland — Nordbyberget</a> ·
       <a href="https://lansstyrelsen.se/varmland/besoksmal/naturreservat-i-varmlands-lan/hastskoholmen.html">Länsstyrelsen Värmland — Hästskoholmen</a> ·
       <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/stora-vilangen.html">Länsstyrelsen Värmland — Stora Vilången</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/olmans-lovskogsraviner.html">Länsstyrelsen Värmland — Ölmans lövskogsraviner</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/lungalvsravinerna.html">Länsstyrelsen Värmland — Lungälvsravinerna</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/sormon.html">Länsstyrelsen Värmland — Sörmon</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/hogemon.html">Länsstyrelsen Värmland — Högemon</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat-i-varmlands-lan/stor-algsjon.html">Länsstyrelsen Värmland — Stor-Älgsjön</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/torsberget.html">Länsstyrelsen Värmland — Torsberget</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/torrakberget.html">Länsstyrelsen Värmland — Torrakberget</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/svartan.html">Länsstyrelsen Värmland — Svartån</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/abengtshojden.html">Länsstyrelsen Värmland — Åbengtshöjden</a> ·
       <a href="https://www.naturvardsverket.se/amnesomraden/allemansratten/">Allemansrätten</a>
     </div>
   </footer>
@@ -886,7 +895,10 @@ const SPECIES = {
       {lat:59.42,lng:13.30,loc:'Rustad strandskog (у Klarälven, близ Grava, координаты приблизительные)',prov:'Вермланд (Карлстад)',ref:true,forest:'Старый пойменный лиственный лес у Кларэльвен, регулярно затапливается — влажный микроклимат, редкие грибы.'},
       {lat:59.664,lng:13.593,loc:'Örtenberget (у сев. оконечности оз. Västra Örten, ≈10 км СВ Deje)',prov:'Вермланд (Forshaga)',ref:true,forest:'Еловый лес со старыми соснами на крутом склоне, лиственные деревья, много мха и лишайника — часть Natura 2000 Örten.'},
       {lat:59.50,lng:13.46,loc:'Pannkakan (дельта Кларэльвен/оз. Lusten, юг Forshaga)',prov:'Вермланд (Forshaga)',ref:true,forest:'Сероольховый пойменный лес, никогда не рубился — редкая для региона первозданная растительность дельты.'},
-      {lat:59.833,lng:13.533,loc:'Hästskoholmen (в черте г. Munkfors)',prov:'Вермланд (Munkfors)',ref:true,forest:'Берег реки, парковая зона, лиственный лес и сосновая вересковая пустошь вперемешку — прямо в городе.'}
+      {lat:59.833,lng:13.533,loc:'Hästskoholmen (в черте г. Munkfors)',prov:'Вермланд (Munkfors)',ref:true,forest:'Берег реки, парковая зона, лиственный лес и сосновая вересковая пустошь вперемешку — прямо в городе.'},
+      {lat:59.387,lng:13.407,loc:'Sörmon (западный въезд в Карлстад по E18)',prov:'Вермланд (Карлстад)',ref:true,forest:'Огромная озовая гряда: дюны, песчаные террасы, сосновый лес на песке (hedtallskog) — классический тальхед.'},
+      {lat:59.443,lng:13.379,loc:'Högemon (≈10 км СЗ Карлстада, 4 км З Skåre)',prov:'Вермланд (Карлстад)',ref:true,forest:'Песчаный холм 105 м с вересковым сосновым лесом (hedtallskog), ледниковые гряды.'},
+      {lat:59.66,lng:14.30,loc:'Åbengtshöjden (СВ Saxåhyttan, координаты приблизительные)',prov:'Вермланд (Filipstad)',ref:true,forest:'Нетронутый с 1950-х старый лес и болота, высокая влажность почвы и воздуха.'}
     ]
   },
   tr:{
@@ -915,7 +927,10 @@ const SPECIES = {
       {lat:59.42,lng:13.30,loc:'Rustad strandskog (у Klarälven, близ Grava, координаты приблизительные)',prov:'Вермланд (Карлстад)',ref:true,forest:'Пойменный лиственный лес у Кларэльвен, регулярно затапливается — влажный микроклимат.'},
       {lat:59.664,lng:13.593,loc:'Örtenberget (у сев. оконечности оз. Västra Örten, ≈10 км СВ Deje)',prov:'Вермланд (Forshaga)',ref:true,forest:'Еловый лес со старыми соснами на крутом склоне, много мха — часть Natura 2000 Örten.'},
       {lat:59.50,lng:13.46,loc:'Pannkakan (дельта Кларэльвен/оз. Lusten, юг Forshaga)',prov:'Вермланд (Forshaga)',ref:true,forest:'Сероольховый пойменный лес, никогда не рубился.'},
-      {lat:59.833,lng:13.533,loc:'Hästskoholmen (в черте г. Munkfors)',prov:'Вермланд (Munkfors)',ref:true,forest:'Берег реки, лиственный лес и сосновая пустошь — трубковидная лисичка любит такие сырые прибрежные участки.'}
+      {lat:59.833,lng:13.533,loc:'Hästskoholmen (в черте г. Munkfors)',prov:'Вермланд (Munkfors)',ref:true,forest:'Берег реки, лиственный лес и сосновая пустошь — трубковидная лисичка любит такие сырые прибрежные участки.'},
+      {lat:59.387,lng:13.407,loc:'Sörmon (западный въезд в Карлстад по E18)',prov:'Вермланд (Карлстад)',ref:true,forest:'Озовая гряда с сосновым лесом на песке (hedtallskog) — классический тальхед.'},
+      {lat:59.443,lng:13.379,loc:'Högemon (≈10 км СЗ Карлстада)',prov:'Вермланд (Карлстад)',ref:true,forest:'Песчаный холм с вересковым сосновым лесом (hedtallskog).'},
+      {lat:59.66,lng:14.30,loc:'Åbengtshöjden (СВ Saxåhyttan, координаты приблизительные)',prov:'Вермланд (Filipstad)',ref:true,forest:'Нетронутый с 1950-х старый лес и болота, влажный микроклимат — почти не тронут лесозаготовкой.'}
     ]
   },
   black:{
@@ -942,7 +957,11 @@ const SPECIES = {
       {lat:59.533,lng:13.023,loc:'Ryen (≈10 км З Fagerås)',prov:'Вермланд (Grums)',ref:true,forest:'Северный склон, богатая (näringsrik) ельниковая почва с участками извести (kalkrik jordmån) — известковая подложка под елью встречается реже, но подходит виду.'},
       {lat:59.68,lng:13.435,loc:'Edeby naturreservat (≈1 км В Övre Ulleruds kyrka)',prov:'Вермланд (Forshaga)',ref:true,forest:'Пойменный лиственный лес у Кларэльвен (берёза, осина), богатая нанос­ная почва, регулярно затапливается.'},
       {lat:59.666,lng:13.492,loc:'Tjärnberget (≈4 км СЗ Mölnbacka)',prov:'Вермланд (Forshaga)',ref:true,forest:'Богатый (näringsrik) еловый лес и тайга на крутом рельефе, индикатор известковой почвы (hällebräcka).'},
-      {lat:59.647,lng:13.641,loc:'Nordbyberget (≈7 км СЗ Molkom)',prov:'Вермланд (Karlstad/Filipstad)',ref:true,forest:'Гиперитовая (известковая) порода: наверху сосны старше 200 лет, ниже — серая ольха, осина, клён, ива; богатая флора на щелочной почве.'}
+      {lat:59.647,lng:13.641,loc:'Nordbyberget (≈7 км СЗ Molkom)',prov:'Вермланд (Karlstad/Filipstad)',ref:true,forest:'Гиперитовая (известковая) порода: наверху сосны старше 200 лет, ниже — серая ольха, осина, клён, ива; богатая флора на щелочной почве.'},
+      {lat:59.415,lng:13.896,loc:'Ölmans lövskogsraviner (≈5 км СВ Väse)',prov:'Вермланд (Karlstad)',ref:true,forest:'Овражный лес вдоль реки Ölman: серая ольха, осина, берёза, ива; постоянно влажный, регулярно затапливается.'},
+      {lat:59.65,lng:14.00,loc:'Lungälvsravinerna (у Brattfors, ≈10 км ЮЗ Filipstad)',prov:'Вермланд (Filipstad)',ref:true,forest:'Один из лучших сохранившихся овражных ландшафтов Вермланда — эрозия в песчаных отложениях, богатая флора, редкие лишайники и грибы.'},
+      {lat:59.65,lng:13.55,loc:'Torsberget (зап. берег оз. Västra Örten)',prov:'Вермланд (Forshaga)',ref:true,forest:'Известковый (гиперитовый) еловый лес с орешником (лещиной) и липой — редкая для ели известковая подложка, отличный биотоп чёрной лисички.'},
+      {lat:59.808,lng:13.979,loc:'Svartån (между Bosjön и Grässjön, ≈15 км СЗ Filipstad)',prov:'Вермланд (Filipstad/Hagfors)',ref:true,forest:'Еловый овражный лес (Skäftdalen — крупнейший овраг), рядом сухой песчаный сосняк и пастбищный ельник.'}
     ]
   },
   regalis:{
@@ -968,7 +987,9 @@ const SPECIES = {
       {lat:61.57,lng:12.70,loc:'Fulufjällets nationalpark',prov:'Даларна',ref:true,forest:'Горный ельник со старейшими елями Швеции (в т.ч. «Старый Тьикко») — характерный высокогорный биотоп.'},
       {lat:59.533,lng:13.111,loc:'Klackskullen (≈5 км З Fagerås)',prov:'Вермланд (Kil)',ref:true,forest:'Старая сосна (до 330 лет) на скалистых склонах, ниже — ель, берёза, осина; много лишайника на камнях.'},
       {lat:59.569,lng:13.200,loc:'Storhöjden (≈4 км С Fagerås)',prov:'Вермланд (Kil)',ref:true,forest:'Сосновый лес на гребне горы с лиственными вкраплениями на склонах, скалы и осыпи.'},
-      {lat:59.348,lng:14.033,loc:'Stora Vilången (≈6 км СЗ Кристинехамн, координаты приблизительные)',prov:'Вермланд (Storfors/Kristinehamn)',ref:true,forest:'Многовековые толстые сосны у берега олиготрофного озера и на островах, много сухостоя.'}
+      {lat:59.348,lng:14.033,loc:'Stora Vilången (≈6 км СЗ Кристинехамн, координаты приблизительные)',prov:'Вермланд (Storfors/Kristinehamn)',ref:true,forest:'Многовековые толстые сосны у берега олиготрофного озера и на островах, много сухостоя.'},
+      {lat:59.457,lng:14.117,loc:'Stor-Älgsjön (≈12 км ЮЗ Storfors)',prov:'Вермланд (Storfors)',ref:true,forest:'Старый сосняк вокруг озера на тонкой почве, на вершинах — ельник с богатым бородатым лишайником (Usnea).'},
+      {lat:59.63,lng:13.60,loc:'Torrakberget (юж. берег оз. Västra Örten)',prov:'Вермланд (Карлстад)',ref:true,forest:'Крупнейший цельный естественный лес коммуны Карлстад: сосны до 350 лет на вершине, ниже смешанный хвойный лес.'}
     ]
   },
   matsutake:{
