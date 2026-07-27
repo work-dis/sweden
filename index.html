@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Прогноз грибов Швеции 2026 — где искать</title>
+<title>Грибные биотопы Швеции — леса, районы и наблюдения</title>
 <style>
 /* required styles */
 
@@ -731,6 +731,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .sw-hex{display:inline-block;width:13px;height:13px;background:#e8552f;border-radius:3px;vertical-align:middle;margin-right:4px}
   .note{font-size:.84rem;color:var(--muted);background:#faf8f2;border-left:3px solid var(--sp);padding:10px 14px;border-radius:6px;margin-top:12px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .forest-guide{overflow-x:auto}
+  .forest-guide table{min-width:820px}
+  .fit{display:inline-block;min-width:86px;padding:3px 7px;border-radius:999px;text-align:center;font-size:.76rem;font-weight:700}
+  .fit-high{background:#dcefdc;color:#245b2b}
+  .fit-mid{background:#fff0c7;color:#7a5700}
+  .fit-low{background:#eee;color:#666}
   .chartbox{position:relative;height:280px}
   table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:4px}
   th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line)}
@@ -754,9 +760,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </head>
 <body>
 <header class="hero">
-  <h1>🍄 Прогноз: где искать грибы в Швеции — сезон 2026</h1>
-  <p>Пять видов на выбор. Реальные находки из Artportalen (через GBIF) и известные грибные места, тепловой слой плотности, точные координаты для навигатора и честный сезонный прогноз.</p>
-  <span class="tag">Данные Artportalen/GBIF · находки 2025–2026 · сегодня: 27 июля 2026</span>
+  <h1>🍄 Грибные биотопы Швеции: где искать и как читать карту</h1>
+  <p>Пять видов, наблюдения Artportalen через GBIF и участки с потенциально подходящим лесом. Карта помогает выбрать район, но не обещает урожай и не заменяет проверку биотопа на месте.</p>
+  <span class="tag">Снимок агрегатов GBIF: 27 июля 2026 · география: исторические ландскапы</span>
 </header>
 
 <div class="selector" id="selector"></div>
@@ -773,6 +779,39 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="fcell"><h3>🎯 Прогноз: где искать</h3><p id="fcWhere"></p></div>
   </div>
 
+  <h2>🌳 Какие грибы искать в разных лесах</h2>
+  <p class="lead">Практическая матрица для Швеции. «Высокая» означает характерный биотоп вида, а не гарантию плодовых тел: важны дерево-хозяин, почва, влажность, возраст леса и погода.</p>
+  <div class="card forest-guide">
+    <table>
+      <thead>
+        <tr><th>Тип леса</th><th>Как распознать</th><th>Обыкновенная лисичка</th><th>Трубковидная лисичка</th><th>Чёрная лисичка</th><th>Королевский мухомор</th><th>Мацутаке</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Ельник, мшистый/черничный</b></td><td>Ель, мох, черника; свежая или влажная почва</td>
+          <td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-low">низкая*</span></td><td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-low">низкая</span></td>
+        </tr>
+        <tr>
+          <td><b>Сухой песчаный сосняк (tallhed)</b></td><td>Сосна, песок/озовая гряда, лишайники, бедный напочвенный покров</td>
+          <td><span class="fit fit-mid">возможна</span></td><td><span class="fit fit-low">низкая</span></td><td><span class="fit fit-low">низкая</span></td><td><span class="fit fit-mid">возможна</span></td><td><span class="fit fit-high">высокая</span></td>
+        </tr>
+        <tr>
+          <td><b>Влажный хвойный/смешанный лес</b></td><td>Ель и берёза, мох, ложбины, края болот; без постоянного затопления</td>
+          <td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-mid">возможна*</span></td><td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-low">низкая</span></td>
+        </tr>
+        <tr>
+          <td><b>Буковый/дубовый лес, лещинник</b></td><td>Бук, дуб или лещина; листовой опад, часто богатая или известковая/глинистая почва</td>
+          <td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-mid">возможна</span></td><td><span class="fit fit-high">высокая</span></td><td><span class="fit fit-low">низкая</span></td><td><span class="fit fit-low">низкая</span></td>
+        </tr>
+        <tr>
+          <td><b>Пойменный ольшаник/ивняк</b></td><td>Ольха и ива, наносная почва, регулярное затопление</td>
+          <td><span class="fit fit-low">низкая</span></td><td><span class="fit fit-low">низкая</span></td><td><span class="fit fit-low">низкая*</span></td><td><span class="fit fit-low">низкая</span></td><td><span class="fit fit-low">низкая</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note">* Чёрная лисичка прежде всего связана с богатыми лиственными лесами — буком, дубом и лещиной. В ельнике или пойме она правдоподобна только при наличии подходящих лиственных деревьев и богатой, часто известковой или глинистой почвы.</div>
+  </div>
+
   <h2>Карта: плотность находок + точки этого/прошлого сезона</h2>
   <p class="lead">🔥 тёплые шестиугольники — где реально находили вид (живой слой GBIF). 📍 пины — конкретные свежие находки; круг вокруг пина = точность координаты. Клик по пину — координаты и кнопки навигатора.</p>
   <div class="card">
@@ -780,7 +819,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="legend">
       <span><span class="sw-hex"></span><b>Плотность</b> находок (GBIF)</span>
       <span>📍 <b>Свежая находка</b> (см. список ниже)</span>
-      <span>🌲 <b>Известный биотоп</b> — заповедник/лес с подходящим типом деревьев, где вид уже отмечался</span>
+      <span>🌲 <b>Кандидатный биотоп</b> — описание леса подходит виду; наличие вида в точке не гарантировано</span>
       <span>⭕ круг = радиус неточности координаты</span>
     </div>
     <div class="note" id="mapNote"></div>
@@ -793,25 +832,31 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <div class="legend"><span>Жёлтая колонка — текущий месяц (июль).</span></div>
     </div>
     <div class="card">
-      <b style="color:#2f3a26">Где больше всего находок (ландскап)</b>
+      <b style="color:#2f3a26">Где больше всего находок (исторический ландскап)</b>
       <div id="regionTable"></div>
     </div>
   </div>
 
   <h2>📍 Точные координаты — копировать в навигатор</h2>
-  <p class="lead">Формат «широта, долгота» (WGS84) — вставляется в Google Maps, Apple Maps, Яндекс.Навигатор, maps.me и т.п. Это реальные точки наблюдений; грибница держится годами, но точность указана в столбце «±».</p>
+  <p class="lead">Формат «широта, долгота» (WGS84). 📍 — запись наблюдения с указанной точностью; 🌲 — центр природной территории с потенциально подходящим лесом, а не подтверждённая находка. Поле «география» может содержать ландскап, лен, коммуну или ближайший город — они не смешиваются с рейтингом ландскапов.</p>
   <div class="card"><div id="coordList"></div></div>
 
   <footer>
-    <b>Как это читать (честно про «прогноз»).</b> Грибница многолетняя и почти не «переезжает» — она плодоносит из года в год на тех же местах, медленно расширяясь. Поэтому лучший прогноз «где будет в этом сезоне» = где находили раньше + правильный биотоп + подходящие сроки + влага. Тепловой слой и 📍-точки показывают реальные находки Artportalen; 🌲-точки — конкретные заповедники и леса с описанным типом деревьев/почвы, подходящим под биологию вида (по данным Länsstyrelsen и др. источников) — туда стоит ехать целенаправленно. Идти стоит через 1–3 недели после дождя, в сезонное окно вида. Числа отражают и обилие гриба, и активность наблюдателей (на юге и в Мэлардалене репортят чаще).
+    <b>Как это читать.</b> Тепловой слой и 📍-точки показывают записи Artportalen/GBIF. Они отражают одновременно присутствие вида и активность наблюдателей, поэтому это не карта урожайности. 🌲-точки показывают природные территории, описание леса которых сопоставлено с экологией вида; это кандидаты для поиска, а не подтверждённые местонахождения. Плодоношение зависит от влаги и температуры в предшествующие недели.
     <br><br>
-    <b>Правовое и безопасность.</b> Allemansrätten разрешает собирать съедобные грибы для себя почти везде, кроме участков у домов и охраняемых зон с ограничениями (смотри аншлаги). <b>Мухомор королевский ядовит</b> — только для опознавания. <b>Мацутаке (голиатмусерон) — краснокнижный (VU)</b>: собирай бережно, срезай зрелые, не разрушай грибницу, вноси находки в Artportalen.
+    <b>Правовое и безопасность.</b> Allemansrätten обычно позволяет собирать дикорастущие незаповедные грибы, но в национальных парках и резерватах действуют собственные правила — проверяй предписания конкретной территории. <b>Королевский мухомор ядовит</b> — только для опознавания. <b>Мацутаке имеет категорию VU в Красном списке Швеции 2025</b> (это не категория глобального списка IUCN); не повреждай почву и проверяй местные ограничения.
     <br><br>
     <b>Источники:</b>
     <div class="src">
       GBIF Occurrence/Maps API (данные Artportalen / SLU Artdatabanken): <a href="https://www.gbif.org/species/5249504">Cantharellus cibarius</a>, <a href="https://www.gbif.org/species/2554536">Craterellus tubaeformis</a>, <a href="https://www.gbif.org/species/2554662">Craterellus cornucopioides</a>, <a href="https://www.gbif.org/species/5240248">Amanita regalis</a>, <a href="https://www.gbif.org/species/5241820">Tricholoma matsutake</a> ·
-      <a href="https://sv.wikipedia.org/wiki/Svart_trumpetsvamp">Svart trumpetsvamp</a> ·
-      <a href="https://sv.wikipedia.org/wiki/Goliatmusseron">Goliatmusseron</a> ·
+      <a href="https://www.nrm.se/fakta-om-naturen/vaxter/svampar/kantareller">Naturhistoriska riksmuseet — kantareller</a> ·
+      <a href="https://www.slu.se/institutioner/mark-miljo/miljoanalys/markinfo/standort/vegetation2/vaxtsamhallenvegetationstyper/">SLU — типы лесной растительности</a> ·
+      <a href="https://www.slu.se/centrumbildningar-och-projekt/riksskogstaxeringen/statistik-om-skog/senaste-statistiken/produktiv-skogsmark/">SLU Riksskogstaxeringen — леса Швеции</a> ·
+      <a href="https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/lan-och-kommuner/">SCB — лены и коммуны</a> ·
+      <a href="https://giftinformation.se/svampregister/brun-flugsvamp/">Giftinformationscentralen — brun flugsvamp</a> ·
+      <a href="https://www.lansstyrelsen.se/uppsala/besoksmal/naturreservat/norra-lunsen.html">Länsstyrelsen Uppsala — Norra Lunsen</a> ·
+      <a href="https://www.sverigesnationalparker.se/soderasen">Sveriges nationalparker — Söderåsen</a> ·
+      <a href="https://www.sverigesnationalparker.se/upptack-nationalparkerna/farnebofjardens-nationalpark">Sveriges nationalparker — Färnebofjärden</a> ·
       <a href="https://artfakta.se/taxa/6276">Artfakta — goliatmusseron</a> ·
       <a href="https://svampindex.se/artiklar/kantareller/">Svampindex — kantareller</a> ·
       <a href="https://www.lansstyrelsen.se/skane/besoksmal/nationalparker/dalby-soderskog-nationalpark.html">Länsstyrelsen Skåne — Dalby Söderskog</a> ·
@@ -859,16 +904,16 @@ const TODAY_M = 7; // июль
 const SPECIES = {
   cib:{
     ru:'Лисичка обыкновенная', sci:'Cantharellus cibarius', sw:'kantarell',
-    color:'#E8A317', taxon:5249504, total:15553, cls:'edible', banner:'✅ Самый популярный съедобный гриб Швеции.',
+    color:'#E8A317', taxon:5249504, total:15707, cls:'edible', banner:'✅ Съедобный вид; употреблять только после надёжного определения.',
     status:'Разгар сезона: пик находок июль–август–сентябрь, спад к ноябрю.',
-    habitat:'Микориза с дубом, буком, елью, берёзой. Мшистый смешанный/хвойный лес, часто у троп и на кислых бедных почвах; растёт группами, из года в год на тех же местах.',
+    habitat:'Микоризный гриб. В Швеции обычен в ельниках, буковых лесах и под дубами; встречается также в других хвойных и смешанных лесах. Ищи мшистые участки и кромки леса, но не привязывай вид только к кислым бедным почвам.',
     where:'По всей Швеции, больше всего в Гёталанде и Свеаланде: Вестергётланд, Сёдерманланд, Уппланд, Вестманланд, Сконе, Смоланд.',
-    months:[0,0,0,0,0,465,2475,4558,5325,1837,508,165],
-    regions:[['Västergötland',3262],['Södermanland',1692],['Uppland',1404],['Västmanland',1375],['Skåne',1250],['Småland',1244],['Östergötland',900],['Bohuslän',737],['Dalsland',534],['Värmland',455]],
+    months:[70,9,5,8,10,465,2471,4556,5323,1837,508,165],
+    regions:[['Västergötland',3079],['Södermanland',1686],['Västmanland',1375],['Uppland',1272],['Skåne',1250],['Småland',1117],['Östergötland',900],['Bohuslän',737],['Dalsland',534],['Värmland',455]],
     points:[
       {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',ref:true,forest:'Старовозрастная тайга (gammelskog): ель, сосна, местами дуб — редкий для региона старый лес почти нетронутый рубками.'},
       {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',ref:true,forest:'Сплошной хвойный массив: сосна и ель, мшистый подлесок.'},
-      {lat:59.78,lng:17.68,loc:'Lunsen naturreservat',prov:'Уппсала',ref:true,forest:'Классический tallhed — сосна на песчаной гряде, лишайниковый покров.'},
+      {lat:59.78,lng:17.68,loc:'Norra Lunsen naturreservat',prov:'Uppsala kommun, Uppsala län',ref:true,forest:'Мозаика хвойного леса и болот: бедные скальные участки с низкорослой сосной, местами ель; берёза и осина единичны. Это не однородный песчаный tallhed.'},
       {lat:59.83,lng:17.55,loc:'Hågadalen–Nåsten',prov:'Уппсала',ref:true,forest:'Смешанный лес: сосна, ель, берёза, местами дуб на возвышенностях.'},
       {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',ref:true,forest:'Смешанный/хвойный лес у озёр: ель, сосна, берёза.'},
       {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',ref:true,forest:'Хвойный лес на скалах у озёр: сосна, ель.'},
@@ -876,7 +921,7 @@ const SPECIES = {
       {lat:58.12,lng:12.05,loc:'Svartedalens naturreservat',prov:'Бохуслен',ref:true,forest:'Хвойная глушь среди множества озёр: сосна, ель.'},
       {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',ref:true,forest:'Смешанный лес у гряды Кильсберген: дуб, берёза, ель.'},
       {lat:59.42,lng:14.85,loc:'Kilsbergen',prov:'Эребру / Нэрке',ref:true,forest:'Лесной кряж: ель, сосна, берёзовые опушки.'},
-      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',ref:true,forest:'Буковый лес (bokskog) в ущельях на известковой почве.'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Skåne län',ref:true,forest:'Буковые леса с дубом, ольхой и берёзой в глубоких долинах; коренная порода преимущественно гнейс и гнейсогранит, местами диабаз даёт более богатую почву.'},
       {lat:55.70,lng:13.35,loc:'Skrylle naturreservat',prov:'Сконе (Лунд/Далбю)',ref:true,forest:'Смешанный лес: бук, дуб, ель.'},
       {lat:55.53,lng:13.18,loc:'Torup (bokskog)',prov:'Сконе (юг Мальмё)',ref:true,forest:'Буковый лес (bokskog) южнее Мальмё.'},
       {lat:56.35,lng:12.90,loc:'Hallandsåsen',prov:'Сконе / Халланд',ref:true,forest:'Лесистые склоны гряды: бук, ель, смешанный лес.'},
@@ -886,7 +931,7 @@ const SPECIES = {
       {lat:57.85,lng:15.63,loc:'Norra Kvill nationalpark',prov:'Смоланд',ref:true,forest:'Старый хвойный лес: сосна, ель, есть 350-летние сосны.'},
       {lat:56.63,lng:14.70,loc:'Åsnens nationalpark',prov:'Смоланд',ref:true,forest:'Смешанный лес у озера: сосна, ель, дуб на островах.'},
       {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',ref:true,forest:'Дикий сосновый лес у норвежской границы.'},
-      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',ref:true,forest:'Хвойный лес и пойма: ель, сосна, ольха у воды.'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens nationalpark',prov:'Gävleborg/Uppsala/Västmanland/Dalarna län',ref:true,forest:'Мозаика старого хвойного леса, лиственных пойменных лесов, болот и водоёмов; пригодность нужно оценивать на конкретном участке парка.'},
       {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',ref:true,forest:'Крутой прибрежный ельник Высокого берега.'},
       {lat:59.48,lng:13.32,loc:'Kilsravinerna (южная окраина г. Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Влажный овражный лиственный лес прямо у города; сбор грибов и ягод официально разрешён.'},
       {lat:59.608,lng:13.104,loc:'Rennstadsnipan (≈17 км СЗ Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Сосна, осина, липа, лещина на скалистой горе; много сухостоя, следы старого пожара.'},
@@ -903,22 +948,22 @@ const SPECIES = {
   },
   tr:{
     ru:'Трубковидная лисичка', sci:'Craterellus tubaeformis', sw:'trattkantarell',
-    color:'#8B6B3D', taxon:2554536, total:9744, cls:'edible', banner:'✅ Съедобная, поздняя и обильная — часто до заморозков.',
+    color:'#8B6B3D', taxon:2554536, total:10006, cls:'edible', banner:'✅ Съедобный поздний вид; употреблять только после надёжного определения.',
     status:'Набирает силу: пик сентябрь–октябрь, держится до ноября.',
-    habitat:'Свежий влажный мшистый ельник, у ручьёв и на склонах. Поздняя и обильная (сен–ноя+), юг и центр; на севере реже.',
+    habitat:'Микоризный гриб влажных мшистых хвойных и смешанных лесов, особенно ельников; обычен в ложбинах и по краям болот. Постоянно затопленный пойменный лес и сухой лишайниковый сосняк — не равноценная замена.',
     where:'Юг и центр Швеции: Вестергётланд, Сёдерманланд, Вестманланд, Уппланд, Сконе, Смоланд; те же леса, что и обыкновенная лисичка, но чуть позже сезоном.',
-    months:[0,0,0,0,0,4,64,1154,4343,2996,914,245],
-    regions:[['Västergötland',1736],['Södermanland',1333],['Västmanland',1014],['Uppland',965],['Skåne',702],['Småland',628],['Östergötland',432],['Dalsland',347],['Bohuslän',331],['Ångermanland',296]],
+    months:[87,10,8,3,4,4,64,1154,4342,2997,913,245],
+    regions:[['Västergötland',1682],['Södermanland',1325],['Västmanland',1014],['Uppland',890],['Skåne',702],['Småland',623],['Östergötland',432],['Dalsland',347],['Bohuslän',331],['Ångermanland',285]],
     points:[
       {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',ref:true,forest:'Влажный старовозрастный ельник у ручьёв.'},
       {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',ref:true,forest:'Мшистый хвойный массив: ель, сосна.'},
       {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',ref:true,forest:'Смешанный лес у озёр: ель, берёза.'},
       {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',ref:true,forest:'Хвойный лес на скалах у озёр: ель.'},
       {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',ref:true,forest:'Смешанный лес: ель, дуб, берёза.'},
-      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',ref:true,forest:'Влажный буково-еловый лес в ущельях.'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Skåne län',ref:true,forest:'Влажные долины в преимущественно буковом широколиственном лесу; ель встречается на отдельных, в том числе ранее высаженных участках.'},
       {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',ref:true,forest:'Хвойная глушь: ель, сосна.'},
       {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',ref:true,forest:'Влажные ложбины соснового леса.'},
-      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',ref:true,forest:'Хвойный лес и пойма: ель, ольха у воды.'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens nationalpark',prov:'Gävleborg/Uppsala/Västmanland/Dalarna län',ref:true,forest:'Мозаика старого хвойного леса, влажных и заболоченных лесов и поймы; искать следует в мшистых хвойных частях, а не в регулярно затопляемой пойме.'},
       {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',ref:true,forest:'Влажный крутой прибрежный ельник.'},
       {lat:59.48,lng:13.32,loc:'Kilsravinerna (южная окраина г. Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Влажный овражный лиственный лес прямо у города; поздняя трубковидная лисичка любит именно такие сырые ложбины.'},
       {lat:59.608,lng:13.104,loc:'Rennstadsnipan (≈17 км СЗ Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Сосна, осина, липа, лещина на скалистой горе; много сухостоя.'},
@@ -937,7 +982,7 @@ const SPECIES = {
     ru:'Чёрная лисичка', sci:'Craterellus cornucopioides', sw:'svart trumpetsvamp',
     color:'#3d3a34', taxon:2554662, total:3188, cls:'edible', banner:'✅ Съедобный деликатес («чёрный трюфель бедняка»).',
     status:'Рано. Единичные в конце июля, массово — сентябрь–октябрь.',
-    habitat:'Микориза с буком, дубом, лещиной. Влажный лиственный/смешанный лес, богатая известковая почва; склоны к ручьям и овраги в буковом лесу. Прячется под листвой и во мху.',
+    habitat:'Микоризный гриб богатых лиственных лесов с буком, дубом и лещиной, часто на известковой или глинистой почве. Ищи влажные склоны и овраги; один лишь ручей, ольшаник или сырой ельник ещё не означает подходящий биотоп.',
     where:'Юг и центр-восток: Мэлардален (Сёдерманланд, Уппланд, Вестманланд), Сконе, Смоланд, Эстергётланд. Осмотри буково-дубовые склоны у воды после дождей.',
     months:[3,1,2,1,2,1,34,597,1737,610,80,9],
     regions:[['Södermanland',529],['Uppland',517],['Skåne',419],['Småland',260],['Västmanland',211],['Västergötland',201],['Östergötland',114],['Värmland',100],['Närke',99],['Halland',77]],
@@ -948,7 +993,7 @@ const SPECIES = {
       {lat:59.412933,lng:12.5587,u:100,loc:'Arvika (Vik)',prov:'Värmland',date:'2025-08-16',forest:'Смешанный лес у воды: ель, берёза, местами дуб.'},
       {lat:59.69148,lng:15.29709,u:1500,loc:'Jättåkerskogen, Ramsberg',prov:'Västmanland',date:'2025-07-26',forest:'Смешанный лес с дубом и лещиной на богатой почве Мэлардалена.'},
       {lat:58.96912,lng:16.301861,u:25031,loc:'Katrineholm (обфусцировано наблюдателем)',prov:'Södermanland',date:'2025-08-04',forest:'Дубово-лещиновый подлесок в смешанном лесу, известковая почва.'},
-      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',ref:true,forest:'Классика вида: старый буковый лес (bokskog) в ущельях, известковая влажная почва.'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Skåne län',ref:true,forest:'Буковый широколиственный лес с дубом, ольхой и берёзой в глубоких влажных долинах. Почва местами богаче над диабазом, но весь парк нельзя называть известковым.'},
       {lat:55.6763,lng:13.3300,loc:'Dalby Söderskogs nationalpark',prov:'Сконе (Лунд)',ref:true,forest:'Самый маленький нацпарк Швеции — старый буковый лес на известковой почве.'},
       {lat:55.5824,lng:13.4150,loc:'Häckeberga naturreservat',prov:'Сконе (Генарп)',ref:true,forest:'Глубокий буковый лес у озера Häckebergasjön.'},
       {lat:58.985,lng:15.035,loc:'Örberga naturreservat (≈1.5 км ЮЗ Åsbro)',prov:'Närke (Askersund)',ref:true,forest:'Известковый хвойный лес (kalkbarrskog), лещиновая роща (hassellund), дубовый выгон (ekhage) и овраг у ручья — очень характерный биотоп вида.'},
@@ -983,7 +1028,7 @@ const SPECIES = {
       {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',ref:true,forest:'Хвойная глушь: ель, сосна, берёза по краям.'},
       {lat:63.09,lng:18.48,loc:'Skuleskogens nationalpark',prov:'Онгерманланд (Höga Kusten)',ref:true,forest:'Бореальный прибрежный ельник с берёзой.'},
       {lat:58.72,lng:14.60,loc:'Tiveden nationalpark',prov:'Эребру / В.Гёталанд',ref:true,forest:'Старый скалистый хвойный лес: ель, сосна, мох.'},
-      {lat:60.20,lng:16.78,loc:'Färnebofjärdens nationalpark',prov:'Даларна/Гестрикланд',ref:true,forest:'Пойменный еловый лес с ольхой и берёзой у воды.'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens nationalpark',prov:'Gävleborg/Uppsala/Västmanland/Dalarna län',ref:true,forest:'Мозаика хвойных, болотных и пойменных лесов; для вида релевантны участки с елью и берёзой, а не парк целиком.'},
       {lat:61.57,lng:12.70,loc:'Fulufjällets nationalpark',prov:'Даларна',ref:true,forest:'Горный ельник со старейшими елями Швеции (в т.ч. «Старый Тьикко») — характерный высокогорный биотоп.'},
       {lat:59.533,lng:13.111,loc:'Klackskullen (≈5 км З Fagerås)',prov:'Вермланд (Kil)',ref:true,forest:'Старая сосна (до 330 лет) на скалистых склонах, ниже — ель, берёза, осина; много лишайника на камнях.'},
       {lat:59.569,lng:13.200,loc:'Storhöjden (≈4 км С Fagerås)',prov:'Вермланд (Kil)',ref:true,forest:'Сосновый лес на гребне горы с лиственными вкраплениями на склонах, скалы и осыпи.'},
@@ -994,9 +1039,9 @@ const SPECIES = {
   },
   matsutake:{
     ru:'Мацутаке (голиаф)', sci:'Tricholoma matsutake', sw:'goliatmusseron',
-    color:'#9c7b3f', taxon:5241820, total:5573, cls:'redlist', banner:'🟡 Съедобный и ценный, НО краснокнижный (IUCN VU). Собирай бережно, не разрушай грибницу, вноси находки в Artportalen.',
+    color:'#9c7b3f', taxon:5241820, total:5573, cls:'redlist', banner:'🟡 Красный список Швеции 2025: VU. Это не глобальная категория IUCN; проверяй правила территории и не повреждай почву.',
     status:'Рано. Основной сезон — конец августа, сентябрь (пик), октябрь.',
-    habitat:'Сухие открытые песчаные сосновые боры (tallhedar), лишайниковый покров; нужны сосна + песок + непрерывность старого леса. Медленная, «капризная» грибница.',
+    habitat:'Микориза с сосной. На севере — сухие песчаные tallhedar с лишайниковым покровом, преимущественно старые леса с непрерывностью деревьев; на юге возможен бедный скальный сосняк.',
     where:'В основном Норрланд от Эрншёльдсвика на север (Лаппланд, Вестерботтен, Онгерманланд) и Даларна; южнее — редкие очаги на бедных песках/скальных сосняках (напр. Slättö sand в Смоланде, есть точки в Сёдерманланде).',
     months:[30,0,0,0,11,1,8,2100,3113,214,7,1],
     regions:[['Lule lappmark',1127],['Västerbotten',1124],['Ångermanland',548],['Norrbotten',502],['Dalarna',409],['Härjedalen',320],['Lycksele lappmark',298],['Torne lappmark',284],['Jämtland',221],['Södermanland',185]],
@@ -1042,8 +1087,9 @@ function drawMap(){
     const coord=p.lat.toFixed(5)+', '+p.lng.toFixed(5);
     const g='https://www.google.com/maps?q='+p.lat+','+p.lng;
     const a='https://maps.apple.com/?q='+p.lat+','+p.lng;
-    const whenLine=p.ref?('<span style="color:#666">'+p.prov+'</span> · <span style="color:#2f7a3d;font-weight:600">известный биотоп вида</span>'):('<span style="color:#666">'+p.prov+' · '+p.date+'</span>');
-    const forestLine=p.forest?('<br><span style="color:#4a5a3a">🌳 '+p.forest+'</span>'):'';
+    const whenLine=p.ref?('<span style="color:#666">'+p.prov+'</span> · <span style="color:#2f7a3d;font-weight:600">кандидатный биотоп, не находка</span>'):('<span style="color:#666">'+p.prov+' · '+p.date+'</span>');
+    const forestText=p.ref?p.forest:'Тип леса не подтверждён использованной записью GBIF; проверяйте участок на месте.';
+    const forestLine='<br><span style="color:#4a5a3a">🌳 '+forestText+'</span>';
     L.marker([p.lat,p.lng],{icon:p.ref?refIcon:pinIcon}).bindPopup(
       '<b>'+p.loc+'</b><br>'+whenLine+forestLine+'<br>'+
       '<span style="font-family:monospace;font-weight:700">'+coord+'</span> <span style="color:#888">±'+(p.u!=null?p.u+' м':'—')+'</span> '+
@@ -1074,25 +1120,27 @@ function drawRegions(){
   s.regions.forEach((r,i)=>{const w=Math.round(r[1]/max*110);
     h+='<tr><td>'+(i+1)+'</td><td>'+r[0]+'</td><td><span class="bar" style="width:'+w+'px"></span></td><td class="num">'+r[1]+'</td></tr>';});
   h+='</tbody></table>';
+  h+='<div class="note">Это значения поля <i>stateProvince</i> в GBIF: в шведских записях оно преимущественно содержит исторические ландскапы, а не современные лены. Суммы могут включать неодинаково заполненные записи.</div>';
   document.getElementById('regionTable').innerHTML=h;
 }
 
 // ============ СПИСОК КООРДИНАТ ============
 function drawCoords(){
   const s=SPECIES[current];
-  let h='<table class="coordtbl"><thead><tr><th>Координаты (шир., долг.)</th><th>±</th><th>Место / провинция</th><th>Тип леса / деревья</th><th>Когда</th><th>Навигатор</th></tr></thead><tbody>';
+  let h='<table class="coordtbl"><thead><tr><th>Координаты (шир., долг.)</th><th>±</th><th>Место / география</th><th>Тип леса / деревья</th><th>Основание</th><th>Навигатор</th></tr></thead><tbody>';
   s.points.forEach((p,i)=>{
     const coord=p.lat.toFixed(5)+', '+p.lng.toFixed(5);
     const g='https://www.google.com/maps?q='+p.lat+','+p.lng;
     const a='https://maps.apple.com/?q='+p.lat+','+p.lng;
     const uCls=(p.u!=null&&p.u>2000)?'u-badge u-hi':'u-badge';
     const uTxt=(p.u!=null)?('±'+(p.u>=1000?(p.u/1000)+' км':p.u+' м')):'—';
-    const whenTxt=p.ref?'<span style="color:#2f7a3d;font-weight:600">🌲 известный биотоп</span>':p.date;
+    const whenTxt=p.ref?'<span style="color:#2f7a3d;font-weight:600">🌲 кандидатный биотоп</span>':'📍 наблюдение '+p.date;
+    const forestText=p.ref?(p.forest||'Описание леса не добавлено'):'Тип леса не подтверждён использованной записью GBIF; проверяйте участок на месте.';
     h+='<tr>'+
        '<td><span class="mono">'+coord+'</span> <button class="copybtn" data-c="'+coord+'">⧉ Копировать</button></td>'+
        '<td><span class="'+uCls+'">'+uTxt+'</span></td>'+
        '<td>'+p.loc+'<br><span style="color:#8a8f7e;font-size:.82rem">'+p.prov+'</span></td>'+
-       '<td style="max-width:220px">'+(p.forest||'—')+'</td>'+
+       '<td style="max-width:220px">'+forestText+'</td>'+
        '<td style="white-space:nowrap">'+whenTxt+'</td>'+
        '<td><a class="maplink" href="'+g+'" target="_blank">Google</a><a class="maplink" href="'+a+'" target="_blank">Apple</a></td>'+
        '</tr>';
@@ -1113,13 +1161,13 @@ function render(){
   document.documentElement.style.setProperty('--sp',s.color);
   document.querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('on',b.dataset.k===current));
   const b=document.getElementById('banner'); b.className='banner '+s.cls; b.textContent=s.banner;
-  document.getElementById('spTitle').textContent=s.ru+' — прогноз и точки';
+  document.getElementById('spTitle').textContent=s.ru+' — биотопы и наблюдения';
   document.getElementById('spSub').innerHTML='<i>'+s.sci+'</i> · швед. <b>'+s.sw+'</b> · всего находок в базе: <b>'+s.total.toLocaleString('ru-RU')+'</b>';
   document.getElementById('fcStatus').textContent=s.status;
   document.getElementById('fcHab').textContent=s.habitat;
   document.getElementById('fcWhere').textContent=s.where;
   const nRef=s.points.filter(p=>p.ref).length, nFind=s.points.length-nRef;
-  document.getElementById('mapNote').innerHTML='📍 '+nFind+' свежих находок (реальные записи Artportalen) и 🌲 '+nRef+' известных мест обитания — заповедники/леса с подходящим типом деревьев и почвы для этого вида. Пины — ориентир по месту; грибница держится годами, но иди в сезонное окно и через 1–3 недели после дождя.'+
+  document.getElementById('mapNote').innerHTML='📍 '+nFind+' записей наблюдений Artportalen/GBIF и 🌲 '+nRef+' кандидатных природных территорий. Для 📍 тип леса не выводится как факт, если он не подтверждён исходной записью. Для 🌲 показано описание леса территории, а соответствие виду является экологической оценкой, не доказательством находки.'+
     (s.cls==='poison'?' <b style="color:#9c2115">Вид ядовит — точки только для опознавания.</b>':'')+
     (s.cls==='redlist'?' <b style="color:#8a5a12">Вид краснокнижный — собирай бережно.</b>':'');
   drawMap(); drawChart(); drawRegions(); drawCoords();
