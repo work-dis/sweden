@@ -127,11 +127,19 @@ Skogsstyrelsen/SLU по Värmlands län:
 - средний диаметр как грубый прокси структуры/зрелости древостоя;
 - SLU Markfuktighet: классы `torr–frisk`, `frisk–fuktig`,
   `fuktig–blöt`.
+- SGU Jordarter 1:25 000–1:100 000: песок/гравий, морена, глина/ил,
+  торфяные грунты и выходы скалы.
 
 Для каждого вида отдельно рассчитываются совместимость деревьев-хозяев,
-предпочтение влажности и вклад среднего диаметра. Затем результат умножается
-на мягкую маску общей древесной структуры. Итог нормирован в диапазон 0–100.
+предпочтение влажности, грунта и вклад среднего диаметра. Затем результат
+умножается на мягкую маску общей древесной структуры. Водные полигоны SGU
+принудительно получают нулевую оценку. Итог нормирован в диапазон 0–100.
 Наблюдения GBIF в формулу не входят и показываются независимым слоем.
+
+Для выбранной пользователем точки отдельно загружаются осадки и температура
+за предыдущие 14 дней. Эта оценка называется «условия сейчас» и не смешивается
+с постоянной оценкой леса. Алгоритм «лучшее рядом» перебирает ячейки в радиусе
+примерно 3 км и предпочитает высокую оценку с небольшим штрафом за расстояние.
 
 Ограничения модели:
 
@@ -139,8 +147,8 @@ Skogsstyrelsen/SLU по Värmlands län:
 - средний диаметр не равен возрасту леса;
 - в породном растре нет отдельного слоя лещины, липы и ольхи, поэтому модель
   чёрной лисички особенно консервативна;
-- тип почвы, кислотность, непрерывность грибницы и погода последних недель в
-  расчёт не входят;
+- измеренный pH, непрерывность грибницы и погода последних недель в постоянный
+  растр не входят; геологический тип грунта — не то же самое, что кислотность;
 - рубки меняются быстрее статических растров, поэтому заявки и выполненные
   рубки подключены как отдельные живые WMS-слои Skogsstyrelsen и должны
   проверяться перед поездкой.
@@ -172,3 +180,6 @@ Skogsstyrelsen/SLU по Värmlands län:
 - [Skogsstyrelsen: описания геоданных](https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/skogsstyrelsens-geodata/)
 - [Skogsstyrelsen: загрузка геоданных](https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/geodatatjanster/ladda-ner-geodata/)
 - [Skogsstyrelsen: техническое описание SLU Markfuktighet](https://www.skogsstyrelsen.se/globalassets/sjalvservice/karttjanster/geodatatjanster/teknisk-beskrivning/raster-markfuktighetskarta-slu---teknisk-beskrivning.pdf)
+- [SGU: Jordarter 1:25 000–1:100 000, OGC API](https://api.sgu.se/oppnadata/jordarter25k-100k/ogc/features/v1/)
+- [Naturvårdsverket: Nationella Marktäckedata](https://www.naturvardsverket.se/verktyg-och-tjanster/kartor-och-karttjanster/nationella-marktackedata/)
+- [Open-Meteo API](https://open-meteo.com/)

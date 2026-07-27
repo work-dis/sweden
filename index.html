@@ -738,6 +738,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .score-pop{min-width:230px}
   .score-pop .score{font-size:1.25rem;font-weight:800;color:var(--sp)}
   .score-pop .coords{font:600 .82rem ui-monospace,SFMono-Regular,Menlo,monospace;color:#62695a}
+  .selected-place{display:none;margin-top:12px;border:2px solid var(--sp);border-radius:13px;background:#fff;padding:14px}
+  .selected-place.show{display:block}
+  .selected-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .selected-head h3{margin:0;color:#2f3a26;font-size:1.05rem}
+  .selected-coords{display:block;width:190px;font:700 .92rem ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:3px;border:0;background:transparent;color:var(--ink);padding:0}
+  .selected-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .selected-actions button,.selected-actions a{display:inline-block;border:1px solid #49663e;border-radius:8px;padding:7px 10px;background:#fff;color:#34502c;text-decoration:none;font-weight:650;font-size:.82rem;cursor:pointer}
+  .selected-actions .primary{background:#3f5c35;color:#fff}
+  .selected-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+  .selected-metric{background:#f6f7f2;border-radius:9px;padding:9px}
+  .selected-metric span{display:block;color:var(--muted);font-size:.72rem;text-transform:uppercase}
+  .selected-metric b{display:block;margin-top:2px;font-size:.9rem}
+  .weather-loading{color:var(--muted);font-weight:500}
   .leaflet-control-layers-toggle{background-image:none!important;text-decoration:none}
   .leaflet-control-layers-toggle::before{content:'🗺️';display:grid;place-items:center;width:100%;height:100%;font-size:20px}
   .note{font-size:.84rem;color:var(--muted);background:#faf8f2;border-left:3px solid var(--sp);padding:10px 14px;border-radius:6px;margin-top:12px}
@@ -766,7 +779,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
   footer a{color:#4a7c50}
   .src{columns:2;column-gap:26px}
-  @media(max-width:820px){.selector{grid-template-columns:1fr}.fc,.grid2,.map-tools{grid-template-columns:1fr}.src{columns:1}#map{height:440px}}
+  @media(max-width:820px){.selector{grid-template-columns:1fr}.fc,.grid2,.map-tools{grid-template-columns:1fr}.selected-grid{grid-template-columns:1fr 1fr}.src{columns:1}#map{height:440px}}
 </style>
 </head>
 <body>
@@ -824,7 +837,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   </div>
 
   <h2>Карта: лесной биотоп + наблюдения</h2>
-  <p class="lead">Цветной растр в районе Vålberg–Karlstad рассчитывается из породного состава, влажности и среднего диаметра леса. Кликни по карте — увидишь координаты и оценку выбранного гриба. В меню справа можно включить официальные лесные объекты и вырубки.</p>
+  <p class="lead">Нажми на участок: карта сохранит точку, покажет лес, грунт и погоду, позволит скопировать координаты или найти лучший расчётный участок в радиусе 3 км. В меню 🗺️ включаются NMD, природные ценности и свежие рубки.</p>
   <div class="card">
     <div id="map"></div>
     <div class="legend">
@@ -836,15 +849,38 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
     <div class="map-tools">
       <div class="model-box">
-        <b>Модель Вермланда 12,5 м</b><br>
-        SLU Skogskarta: сосна, ель, берёза, дуб, бук и средний диаметр; SLU Markfuktighet: 3 класса влажности.
+        <b>Модель Вермланда 12,5 м + грунты SGU</b><br>
+        Породы и структура леса, влажность, песок/морена/глина/торф/скала. Нажми на место или попроси карту найти лучший участок в радиусе 3 км.
         <br><button id="habitatFocus" type="button">Показать Vålberg–Karlstad</button>
         <button id="habitatToggle" class="on" type="button">Слой пригодности включён</button>
       </div>
       <div class="model-box">
         <b>Что означает число</b><br>
-        Это относительная пригодность биотопа 0–100, а не шанс найти гриб и не прогноз урожая. Погода, сезон, почва, история леса и свежие вырубки требуют отдельной проверки.
+        Отдельно показаны постоянная пригодность биотопа и текущие условия по осадкам и температуре. Это ориентир для выбора места, не обещание урожая.
       </div>
+    </div>
+    <div class="selected-place" id="selectedPlace">
+      <div class="selected-head">
+        <div>
+          <h3 id="selectedName">Выбранное место</h3>
+          <input class="selected-coords" id="selectedCoords" aria-label="Координаты выбранного места" readonly>
+        </div>
+        <div id="selectedOverall"></div>
+      </div>
+      <div class="selected-actions">
+        <button class="primary" id="selectedCopy" type="button">⧉ Скопировать координаты</button>
+        <button id="selectedFindBest" type="button">🎯 Найти лучше рядом (3 км)</button>
+        <a id="selectedGoogle" target="_blank" rel="noopener">Google Maps</a>
+        <a id="selectedApple" target="_blank" rel="noopener">Apple Maps</a>
+      </div>
+      <div class="selected-grid">
+        <div class="selected-metric"><span>Биотоп</span><b id="selectedHabitat">—</b></div>
+        <div class="selected-metric"><span>Грунт SGU</span><b id="selectedSoil">—</b></div>
+        <div class="selected-metric"><span>Рельеф</span><b id="selectedElevation" class="weather-loading">загрузка…</b></div>
+        <div class="selected-metric"><span>Дожди 14 дней</span><b id="selectedRain" class="weather-loading">загрузка…</b></div>
+        <div class="selected-metric"><span>Условия сейчас</span><b id="selectedWeather" class="weather-loading">загрузка…</b></div>
+      </div>
+      <div class="note" id="selectedAdvice"></div>
     </div>
     <div class="note" id="mapNote"></div>
   </div>
@@ -924,6 +960,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/brattforsheden.html">Länsstyrelsen Värmland — Brattforsheden</a> ·
       <a href="https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/skogsstyrelsens-geodata/">Skogsstyrelsen — описания геоданных</a> ·
       <a href="https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/geodatatjanster/ladda-ner-geodata/">Skogsstyrelsen — загрузка открытых геоданных</a> ·
+      <a href="https://api.sgu.se/oppnadata/jordarter25k-100k/ogc/features/v1/">SGU — открытые данные о грунтах</a> ·
+      <a href="https://www.naturvardsverket.se/verktyg-och-tjanster/kartor-och-karttjanster/nationella-marktackedata/">Naturvårdsverket — NMD</a> ·
+      <a href="https://open-meteo.com/">Open-Meteo — погода и высота</a> ·
       <a href="https://www.naturvardsverket.se/amnesomraden/allemansratten/">Allemansrätten</a>
     </div>
   </footer>
@@ -1125,6 +1164,8 @@ const lightBase=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}
   maxZoom:19
 });
 const SKS_WMS='https://geodpags.skogsstyrelsen.se/arcgis/services/Geodataportal/';
+const HABITAT_BOUNDS=L.latLngBounds([[59.25,12.70],[59.52,14.25]]);
+const HABITAT_SIZE={width:1800,height:720};
 function sksWms(service,layer,opacity){
   return L.tileLayer.wms(SKS_WMS+service+'/MapServer/WMSServer',{
     layers:layer,format:'image/png',transparent:true,opacity:opacity,
@@ -1132,8 +1173,17 @@ function sksWms(service,layer,opacity){
   });
 }
 const officialLayers={
+  'SGU · тип грунта':L.imageOverlay('assets/habitat/soil-overlay.png',HABITAT_BOUNDS,{
+    pane:'officialForestPane',opacity:.66,attribution:'SGU Jordarter'
+  }),
+  'NMD 2023 · покров и тип леса':L.tileLayer.wms('https://geodata.naturvardsverket.se/inspire/lc-nmd/ows?',{
+    layers:'LC.LandCoverRaster.Bas_2.0',format:'image/png',transparent:true,opacity:.58,
+    pane:'officialForestPane',attribution:'NMD / Naturvårdsverket'
+  }),
   'Skogsstyrelsen · заболоченный лес':sksWms('GeodataportalVisaSumpskog','Sumpskog_Skogsstyrelsen',.55),
   'Skogsstyrelsen · ключевые биотопы':sksWms('GeodataportalVisaNyckelbiotop','Nyckelbiotop_Skogsstyrelsen',.65),
+  'Skogsstyrelsen · объекты природной ценности':sksWms('GeodataportalVisaObjektnaturvarde','Objektnaturvarde_Skogsstyrelsen',.65),
+  'Skogsstyrelsen · природоохранные договоры':sksWms('GeodataportalVisaNaturvardsavtal','Naturvardsavtal_Skogsstyrelsen',.65),
   'Skogsstyrelsen · заявки на рубку':sksWms('GeodataportalVisaAvverkningsanmalan','Avverkningsanmalan_Skogsstyrelsen',.55),
   'Skogsstyrelsen · выполненные рубки':sksWms('GeodataportalVisaUtfordavverkning','UtfordAvverkning_Skogsstyrelsen',.60)
 };
@@ -1142,11 +1192,11 @@ L.control.layers({
   'Светлая карта':lightBase
 },officialLayers,{position:'topright',collapsed:true}).addTo(map);
 map.fitBounds([[55.2,11.0],[69.0,24.5]]);
-let densityLayer=null, pinLayer=L.layerGroup().addTo(map);
-const HABITAT_BOUNDS=L.latLngBounds([[59.25,12.70],[59.52,14.25]]);
-const HABITAT_SIZE={width:1800,height:720};
+let densityLayer=null, pinLayer=L.layerGroup().addTo(map), selectedLayer=L.layerGroup().addTo(map);
 let habitatLayer=null, habitatEnabled=true;
 const scoreImages={};
+let selectedPoint=null, selectionRequest=0;
+const weatherCache={};
 
 function densityUrl(taxon){
   return 'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?taxonKey='+taxon+'&country=SE&bin=hex&hexPerTile=30&style=classic-noborder.poly';
@@ -1175,6 +1225,31 @@ function loadScoreImage(species){
   });
   return scoreImages[species];
 }
+function loadSoilImage(){
+  if(scoreImages.soil) return scoreImages.soil;
+  scoreImages.soil=new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=HABITAT_SIZE.width;canvas.height=HABITAT_SIZE.height;
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(img,0,0);
+      resolve(ctx);
+    };
+    img.onerror=reject;
+    img.src='assets/habitat/soil-category.png';
+  });
+  return scoreImages.soil;
+}
+function habitatPixel(latlng){
+  if(!HABITAT_BOUNDS.contains(latlng)) return null;
+  const west=HABITAT_BOUNDS.getWest(),east=HABITAT_BOUNDS.getEast();
+  const south=HABITAT_BOUNDS.getSouth(),north=HABITAT_BOUNDS.getNorth();
+  return {
+    x:Math.min(HABITAT_SIZE.width-1,Math.max(0,Math.floor((latlng.lng-west)/(east-west)*HABITAT_SIZE.width))),
+    y:Math.min(HABITAT_SIZE.height-1,Math.max(0,Math.floor((north-latlng.lat)/(north-south)*HABITAT_SIZE.height)))
+  };
+}
 function scoreLabel(score){
   if(score<20) return 'лес по модели не распознан или пригодность очень низкая';
   if(score<40) return 'низкая';
@@ -1182,26 +1257,98 @@ function scoreLabel(score){
   if(score<80) return 'хорошая';
   return 'высокая';
 }
-map.on('click',async e=>{
-  if(!HABITAT_BOUNDS.contains(e.latlng)) return;
-  const west=HABITAT_BOUNDS.getWest(),east=HABITAT_BOUNDS.getEast();
-  const south=HABITAT_BOUNDS.getSouth(),north=HABITAT_BOUNDS.getNorth();
-  const x=Math.min(HABITAT_SIZE.width-1,Math.max(0,Math.floor((e.latlng.lng-west)/(east-west)*HABITAT_SIZE.width)));
-  const y=Math.min(HABITAT_SIZE.height-1,Math.max(0,Math.floor((north-e.latlng.lat)/(north-south)*HABITAT_SIZE.height)));
+const SOIL_LABELS={0:'нет данных',1:'песок / гравий',2:'морена',3:'глина / ил',4:'торф / заболоченный грунт',5:'скала / тонкая почва',255:'вода'};
+const TEMP_IDEAL={cib:[11,20],tr:[6,16],black:[10,20],regalis:[9,18],matsutake:[7,16]};
+function weatherLabel(score){
+  if(score<30) return 'слабые';
+  if(score<55) return 'средние';
+  if(score<75) return 'хорошие';
+  return 'очень хорошие';
+}
+async function loadWeather(latlng){
+  const key=latlng.lat.toFixed(3)+','+latlng.lng.toFixed(3);
+  if(weatherCache[key]) return weatherCache[key];
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+latlng.lat.toFixed(5)+'&longitude='+latlng.lng.toFixed(5)+
+    '&daily=precipitation_sum,temperature_2m_mean&past_days=14&forecast_days=3&timezone=auto';
+  weatherCache[key]=fetch(url).then(r=>{if(!r.ok) throw new Error('weather '+r.status);return r.json();});
+  return weatherCache[key];
+}
+function calculateWeather(data,species){
+  const rain=(data.daily&&data.daily.precipitation_sum)||[];
+  const temp=(data.daily&&data.daily.temperature_2m_mean)||[];
+  const pastRain=rain.slice(0,14).map(v=>Number(v)||0);
+  const pastTemp=temp.slice(0,14).filter(v=>Number.isFinite(v));
+  const rain14=pastRain.reduce((a,b)=>a+b,0);
+  const rain7=pastRain.slice(-7).reduce((a,b)=>a+b,0);
+  const avgTemp=pastTemp.length?pastTemp.reduce((a,b)=>a+b,0)/pastTemp.length:12;
+  const futureRain=rain.slice(14).reduce((a,b)=>a+(Number(b)||0),0);
+  const rainScore=rain14<8?rain14/8*.35:rain14<=60?.35+(rain14-8)/52*.65:Math.max(.35,1-(rain14-60)/100);
+  const ideal=TEMP_IDEAL[species],center=(ideal[0]+ideal[1])/2,half=(ideal[1]-ideal[0])/2;
+  const tempScore=Math.max(0,1-Math.max(0,Math.abs(avgTemp-center)-half)/10);
+  const score=Math.round(Math.min(1,.68*rainScore+.32*tempScore)*100);
+  return {score,rain14,rain7,avgTemp,futureRain};
+}
+function placeAdvice(habitat,weather,soil){
+  if(habitat==null) return 'Для этой точки нет подробного локального растра. Координаты и погода доступны, но лес нужно проверить по подложке и официальным слоям.';
+  if(habitat>=70&&weather>=65) return 'Сильный кандидат для выезда: подходящий лес и хорошие текущие условия. Перед поездкой включи слои выполненных рубок и ограничений.';
+  if(habitat>=60&&weather<45) return 'Лес подходит, но текущие погодные условия слабые. Сохрани координаты и проверь участок после дождей.';
+  if(habitat<40) return 'Участок слабый для выбранного вида. Попробуй соседние цветные кварталы с оценкой выше 60.';
+  return 'Участок можно проверить, но лучше сравнить несколько соседних точек и выбрать место с более высокой оценкой.';
+}
+async function renderSelectedPlace(openPopup=false){
+  if(!selectedPoint) return;
+  const request=++selectionRequest, species=current;
+  const latlng=L.latLng(selectedPoint.lat,selectedPoint.lng);
+  const coord=latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5);
+  const pixel=habitatPixel(latlng);
+  const box=document.getElementById('selectedPlace');
+  box.classList.add('show');
+  document.getElementById('selectedName').textContent=selectedPoint.name||'Выбранное место';
+  document.getElementById('selectedCoords').value=coord;
+  document.getElementById('selectedGoogle').href='https://www.google.com/maps?q='+latlng.lat+','+latlng.lng;
+  document.getElementById('selectedApple').href='https://maps.apple.com/?q='+latlng.lat+','+latlng.lng;
+  document.getElementById('selectedHabitat').textContent=pixel?'расчёт…':'вне зоны модели';
+  document.getElementById('selectedSoil').textContent=pixel?'расчёт…':'нет данных';
+  document.getElementById('selectedElevation').textContent='загрузка…';
+  document.getElementById('selectedRain').textContent='загрузка…';
+  document.getElementById('selectedWeather').textContent='загрузка…';
+  selectedLayer.clearLayers();
+  L.circleMarker(latlng,{radius:8,color:'#fff',weight:3,fillColor:SPECIES[current].color,fillOpacity:1}).addTo(selectedLayer);
   try{
-    const ctx=await loadScoreImage(current);
-    const score=Math.round(ctx.getImageData(x,y,1,1).data[0]/255*100);
-    const coord=e.latlng.lat.toFixed(5)+', '+e.latlng.lng.toFixed(5);
-    L.popup().setLatLng(e.latlng).setContent(
-      '<div class="score-pop"><b>'+SPECIES[current].ru+'</b><br>'+
-      '<span class="score">'+score+' / 100</span> · '+scoreLabel(score)+'<br>'+
-      '<span class="coords">'+coord+'</span><br>'+
-      '<small>Пригодность лесного биотопа, не вероятность находки. Проверь слои вырубок и реальный лес на месте.</small></div>'
-    ).openOn(map);
+    const rasterPromise=pixel?Promise.all([loadScoreImage(species),loadSoilImage()]):Promise.resolve([null,null]);
+    const [rasters,weatherData]=await Promise.all([rasterPromise,loadWeather(latlng)]);
+    if(request!==selectionRequest||species!==current) return;
+    const habitat=rasters[0]?Math.round(rasters[0].getImageData(pixel.x,pixel.y,1,1).data[0]/255*100):null;
+    const soilCode=rasters[1]?rasters[1].getImageData(pixel.x,pixel.y,1,1).data[0]:0;
+    const weather=calculateWeather(weatherData,species);
+    document.getElementById('selectedHabitat').textContent=habitat==null?'вне зоны модели':habitat+' / 100 · '+scoreLabel(habitat);
+    document.getElementById('selectedSoil').textContent=SOIL_LABELS[soilCode]||'нет данных';
+    document.getElementById('selectedElevation').textContent=Number.isFinite(weatherData.elevation)?'≈ '+Math.round(weatherData.elevation)+' м над морем':'нет данных';
+    document.getElementById('selectedRain').textContent=weather.rain14.toFixed(0)+' мм · 7 дней: '+weather.rain7.toFixed(0)+' мм';
+    document.getElementById('selectedWeather').textContent=weather.score+' / 100 · '+weatherLabel(weather.score);
+    document.getElementById('selectedOverall').innerHTML='<span class="fit '+((habitat||0)>=70&&weather.score>=60?'fit-high':(habitat||0)>=45?'fit-mid':'fit-low')+'">'+
+      ((habitat||0)>=70&&weather.score>=60?'ехать проверять':(habitat||0)>=45?'сравнить рядом':'искать другое')+'</span>';
+    document.getElementById('selectedAdvice').textContent=placeAdvice(habitat,weather.score,soilCode);
+    if(openPopup){
+      L.popup().setLatLng(latlng).setContent(
+        '<div class="score-pop"><b>'+SPECIES[species].ru+'</b><br>'+
+        '<span class="score">'+(habitat==null?'—':habitat+' / 100')+'</span> '+(habitat==null?'вне зоны модели':'· '+scoreLabel(habitat))+'<br>'+
+        '<span class="coords">'+coord+'</span><br>'+
+        '<button class="copybtn" onclick="copyText(\''+coord+'\',this)">⧉ Скопировать координаты</button></div>'
+      ).openOn(map);
+    }
   }catch(err){
-    L.popup().setLatLng(e.latlng).setContent('Не удалось прочитать локальный слой оценки. Запусти страницу через локальный веб-сервер.').openOn(map);
+    if(request!==selectionRequest) return;
+    document.getElementById('selectedRain').textContent='не удалось загрузить';
+    document.getElementById('selectedWeather').textContent='проверь вручную';
+    document.getElementById('selectedAdvice').textContent='Биотоп можно оценить по карте, но погодные данные сейчас недоступны.';
   }
-});
+}
+function selectPlace(latlng,name,openPopup){
+  selectedPoint={lat:latlng.lat,lng:latlng.lng,name:name||'Выбранное место'};
+  renderSelectedPlace(openPopup);
+}
+map.on('click',e=>selectPlace(e.latlng,'Выбранная точка',true));
 function drawMap(){
   const s=SPECIES[current];
   updateHabitatLayer();
@@ -1221,12 +1368,13 @@ function drawMap(){
     const forestText=p.ref?p.forest:'Тип леса не подтверждён использованной записью GBIF; проверяйте участок на месте.';
     const forestLine='<br><span style="color:#4a5a3a">🌳 '+forestText+'</span>';
     const sourceLine=p.source?('<br><a href="'+p.source+'" target="_blank" rel="noopener">Официальное описание территории ↗</a>'):'';
-    L.marker([p.lat,p.lng],{icon:p.ref?refIcon:pinIcon}).bindPopup(
+    const marker=L.marker([p.lat,p.lng],{icon:p.ref?refIcon:pinIcon}).bindPopup(
       '<b>'+p.loc+'</b><br>'+whenLine+forestLine+sourceLine+'<br>'+
       '<span style="font-family:monospace;font-weight:700">'+coord+'</span> <span style="color:#888">±'+(p.u!=null?p.u+' м':'—')+'</span> '+
       '<button class="copybtn" onclick="copyText(\''+coord+'\',this)">⧉ Копировать</button><br>'+
       '<a href="'+g+'" target="_blank">Google Maps</a> · <a href="'+a+'" target="_blank">Apple Maps</a>'
     ).addTo(pinLayer);
+    marker.on('click',()=>selectPlace(L.latLng(p.lat,p.lng),p.loc,false));
   });
 }
 
@@ -1237,6 +1385,39 @@ document.getElementById('habitatToggle').addEventListener('click',e=>{
   e.currentTarget.textContent=habitatEnabled?'Слой пригодности включён':'Слой пригодности выключен';
 });
 document.getElementById('habitatFocus').addEventListener('click',()=>map.fitBounds(HABITAT_BOUNDS,{padding:[12,12]}));
+document.getElementById('selectedCopy').addEventListener('click',e=>{
+  if(!selectedPoint) return;
+  copyText(selectedPoint.lat.toFixed(5)+', '+selectedPoint.lng.toFixed(5),e.currentTarget,document.getElementById('selectedCoords'));
+});
+document.getElementById('selectedFindBest').addEventListener('click',async e=>{
+  if(!selectedPoint) return;
+  const button=e.currentTarget;
+  const origin=L.latLng(selectedPoint.lat,selectedPoint.lng),pixel=habitatPixel(origin);
+  if(!pixel){button.textContent='Точка вне зоны модели';return;}
+  const original=button.textContent;button.textContent='Ищу участок…';
+  try{
+    const ctx=await loadScoreImage(current);
+    let best={score:-1,x:pixel.x,y:pixel.y};
+    const radius=70;
+    for(let dy=-radius;dy<=radius;dy+=3){
+      for(let dx=-radius;dx<=radius;dx+=3){
+        const distance=Math.hypot(dx,dy);
+        if(distance>radius) continue;
+        const x=pixel.x+dx,y=pixel.y+dy;
+        if(x<0||y<0||x>=HABITAT_SIZE.width||y>=HABITAT_SIZE.height) continue;
+        const score=ctx.getImageData(x,y,1,1).data[0]/255*100-distance*.08;
+        if(score>best.score) best={score,x,y};
+      }
+    }
+    const lng=HABITAT_BOUNDS.getWest()+(best.x+.5)/HABITAT_SIZE.width*(HABITAT_BOUNDS.getEast()-HABITAT_BOUNDS.getWest());
+    const lat=HABITAT_BOUNDS.getNorth()-(best.y+.5)/HABITAT_SIZE.height*(HABITAT_BOUNDS.getNorth()-HABITAT_BOUNDS.getSouth());
+    const bestLatLng=L.latLng(lat,lng);
+    map.panTo(bestLatLng);
+    selectPlace(bestLatLng,'Лучший расчётный участок в радиусе 3 км',true);
+  }finally{
+    button.textContent=original;
+  }
+});
 
 // ============ ГРАФИК СЕЗОНА ============
 function drawChart(){
@@ -1289,11 +1470,22 @@ function drawCoords(){
   document.getElementById('coordList').innerHTML=h;
   document.querySelectorAll('#coordList .copybtn').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.c,b)));
 }
-function copyText(txt,btn){
-  const ok=()=>{const o=btn.textContent;btn.textContent='✓ Скопировано';setTimeout(()=>btn.textContent=o,1400);};
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok).catch(()=>fb(txt,ok));}else fb(txt,ok);
+function copyText(txt,btn,fallbackField){
+  let finished=false;
+  const ok=()=>{if(finished)return;finished=true;const o=btn.textContent;btn.textContent='✓ Скопировано';setTimeout(()=>btn.textContent=o,1400);};
+  if(fallbackField){
+    fallbackField.focus();fallbackField.select();
+    try{if(document.execCommand('copy'))ok();}catch(e){}
+  }else if(fb(txt,ok)) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok).catch(()=>{});
+  if(fallbackField) setTimeout(()=>{
+    if(finished)return;
+    fallbackField.focus();fallbackField.select();
+    const o=btn.textContent;btn.textContent='Выделено — нажми ⌘C / Ctrl+C';
+    setTimeout(()=>btn.textContent=o,2200);
+  },300);
 }
-function fb(txt,ok){const t=document.createElement('textarea');t.value=txt;t.style.position='fixed';t.style.opacity=0;document.body.appendChild(t);t.focus();t.select();try{document.execCommand('copy');ok();}catch(e){}document.body.removeChild(t);}
+function fb(txt,ok){const t=document.createElement('textarea');t.value=txt;t.style.position='fixed';t.style.opacity=0;document.body.appendChild(t);t.focus();t.select();let copied=false;try{copied=document.execCommand('copy');if(copied)ok();}catch(e){}document.body.removeChild(t);return copied;}
 
 // ============ ПАНЕЛЬ ВИДА ============
 function render(){
@@ -1311,6 +1503,7 @@ function render(){
     (s.cls==='poison'?' <b style="color:#9c2115">Вид ядовит — точки только для опознавания.</b>':'')+
     (s.cls==='redlist'?' <b style="color:#8a5a12">Вид краснокнижный — собирай бережно.</b>':'');
   drawMap(); drawChart(); drawRegions(); drawCoords();
+  if(selectedPoint) renderSelectedPlace(false);
 }
 
 // селектор

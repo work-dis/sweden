@@ -1,5 +1,5 @@
 {
-  "model": "varmland-habitat-v1",
+  "model": "varmland-habitat-v2",
   "generated": "2026-07-27",
   "bboxWgs84": [
     12.7,
@@ -20,6 +20,20 @@
     "diameter": "sksSLUskogskartaMedeldiameter17.tif",
     "moisture": "sksSLUmfMarkfuktighet_klassad17.tif"
   },
+  "soilInput": [
+    "sgu-soil.json",
+    "sgu-page-10000.json",
+    "sgu-page-20000.json"
+  ],
+  "soilCategories": {
+    "0": "unknown",
+    "1": "sand-gravel",
+    "2": "moraine",
+    "3": "clay-silt",
+    "4": "peat-wetland",
+    "5": "rock-thin-soil",
+    "255": "water"
+  },
   "moistureClasses": {
     "1": "dry-fresh",
     "2": "fresh-moist",
@@ -27,29 +41,29 @@
   },
   "stats": {
     "cib": {
-      "p50": 65.0,
-      "p90": 78.5,
-      "max": 92.2
+      "p50": 65.3,
+      "p90": 78.2,
+      "max": 91.8
     },
     "tr": {
-      "p50": 49.9,
-      "p90": 70.1,
-      "max": 96.9
+      "p50": 48.3,
+      "p90": 69.2,
+      "max": 95.3
     },
     "black": {
-      "p50": 28.0,
-      "p90": 39.1,
-      "max": 94.7
+      "p50": 28.6,
+      "p90": 39.9,
+      "max": 94.9
     },
     "regalis": {
-      "p50": 58.4,
-      "p90": 71.6,
-      "max": 85.6
+      "p50": 59.0,
+      "p90": 71.3,
+      "max": 85.5
     },
     "matsutake": {
-      "p50": 44.5,
+      "p50": 44.2,
       "p90": 67.9,
-      "max": 92.2
+      "max": 92.7
     }
   }
 }
