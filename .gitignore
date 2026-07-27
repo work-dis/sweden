@@ -2,3 +2,5 @@
 Thumbs.db
 *.tmp
 _check.js
+
+.claude/
