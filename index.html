@@ -755,7 +755,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <body>
 <header class="hero">
   <h1>🍄 Прогноз: где искать грибы в Швеции — сезон 2026</h1>
-  <p>Три вида на выбор. Реальные находки из Artportalen (через GBIF), тепловой слой плотности, точные координаты для навигатора и честный сезонный прогноз.</p>
+  <p>Пять видов на выбор. Реальные находки из Artportalen (через GBIF) и известные грибные места, тепловой слой плотности, точные координаты для навигатора и честный сезонный прогноз.</p>
   <span class="tag">Данные Artportalen/GBIF · находки 2025–2026 · сегодня: 27 июля 2026</span>
 </header>
 
@@ -808,10 +808,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <br><br>
     <b>Источники:</b>
     <div class="src">
-      GBIF Occurrence/Maps API (данные Artportalen / SLU Artdatabanken): <a href="https://www.gbif.org/species/2554662">Craterellus cornucopioides</a>, <a href="https://www.gbif.org/species/5240248">Amanita regalis</a>, <a href="https://www.gbif.org/species/5241820">Tricholoma matsutake</a> ·
+      GBIF Occurrence/Maps API (данные Artportalen / SLU Artdatabanken): <a href="https://www.gbif.org/species/5249504">Cantharellus cibarius</a>, <a href="https://www.gbif.org/species/2554536">Craterellus tubaeformis</a>, <a href="https://www.gbif.org/species/2554662">Craterellus cornucopioides</a>, <a href="https://www.gbif.org/species/5240248">Amanita regalis</a>, <a href="https://www.gbif.org/species/5241820">Tricholoma matsutake</a> ·
       <a href="https://sv.wikipedia.org/wiki/Svart_trumpetsvamp">Svart trumpetsvamp</a> ·
       <a href="https://sv.wikipedia.org/wiki/Goliatmusseron">Goliatmusseron</a> ·
       <a href="https://artfakta.se/taxa/6276">Artfakta — goliatmusseron</a> ·
+      <a href="https://svampindex.se/artiklar/kantareller/">Svampindex — kantareller</a> ·
       <a href="https://www.naturvardsverket.se/amnesomraden/allemansratten/">Allemansrätten</a>
     </div>
   </footer>
@@ -821,6 +822,60 @@ svg.leaflet-image-layer.leaflet-interactive path {
 // ============ ДАННЫЕ (Artportalen через GBIF) ============
 const TODAY_M = 7; // июль
 const SPECIES = {
+  cib:{
+    ru:'Лисичка обыкновенная', sci:'Cantharellus cibarius', sw:'kantarell',
+    color:'#E8A317', taxon:5249504, total:15553, cls:'edible', banner:'✅ Самый популярный съедобный гриб Швеции.',
+    status:'Разгар сезона: пик находок июль–август–сентябрь, спад к ноябрю.',
+    habitat:'Микориза с дубом, буком, елью, берёзой. Мшистый смешанный/хвойный лес, часто у троп и на кислых бедных почвах; растёт группами, из года в год на тех же местах.',
+    where:'По всей Швеции, больше всего в Гёталанде и Свеаланде: Вестергётланд, Сёдерманланд, Уппланд, Вестманланд, Сконе, Смоланд.',
+    months:[0,0,0,0,0,465,2475,4558,5325,1837,508,165],
+    regions:[['Västergötland',3262],['Södermanland',1692],['Uppland',1404],['Västmanland',1375],['Skåne',1250],['Småland',1244],['Östergötland',900],['Bohuslän',737],['Dalsland',534],['Värmland',455]],
+    points:[
+      {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',date:'ориентир: старовозрастный лес'},
+      {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',date:'ориентир: хвойный массив'},
+      {lat:59.78,lng:17.68,loc:'Lunsen naturreservat',prov:'Уппсала',date:'ориентир: сосняк на песке'},
+      {lat:59.83,lng:17.55,loc:'Hågadalen–Nåsten',prov:'Уппсала',date:'ориентир: смешанный лес'},
+      {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',date:'ориентир: лес у озёр'},
+      {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',date:'ориентир: хвойный, скалы, озёра'},
+      {lat:58.02,lng:12.30,loc:'Risveden',prov:'сев-вост. Гётеборга',date:'ориентир: старый лес'},
+      {lat:58.12,lng:12.05,loc:'Svartedalens naturreservat',prov:'Бохуслен',date:'ориентир: хвойный, много озёр'},
+      {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',date:'ориентир: смешанный лес'},
+      {lat:59.42,lng:14.85,loc:'Kilsbergen',prov:'Эребру / Нэрке',date:'ориентир: лесной кряж'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',date:'ориентир: буковый лес'},
+      {lat:55.70,lng:13.35,loc:'Skrylle naturreservat',prov:'Сконе (Лунд/Далбю)',date:'ориентир: смешанный лес'},
+      {lat:55.53,lng:13.18,loc:'Torup (bokskog)',prov:'Сконе (юг Мальмё)',date:'ориентир: буковый лес'},
+      {lat:56.35,lng:12.90,loc:'Hallandsåsen',prov:'Сконе / Халланд',date:'ориентир: лесистые склоны'},
+      {lat:58.72,lng:14.60,loc:'Tiveden nationalpark',prov:'Эребру / В.Гёталанд',date:'ориентир: старый скалистый лес'},
+      {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',date:'ориентир: хвойная глушь'},
+      {lat:58.10,lng:14.05,loc:'Hökensås',prov:'Вестергётланд',date:'ориентир: сосняк на песке'},
+      {lat:57.85,lng:15.63,loc:'Norra Kvill nationalpark',prov:'Смоланд',date:'ориентир: старый хвойный лес'},
+      {lat:56.63,lng:14.70,loc:'Åsnens nationalpark',prov:'Смоланд',date:'ориентир: лес у озера'},
+      {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',date:'ориентир: сосновый лес'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',date:'ориентир: лес и пойма'},
+      {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',date:'ориентир: ельник'}
+    ]
+  },
+  tr:{
+    ru:'Трубковидная лисичка', sci:'Craterellus tubaeformis', sw:'trattkantarell',
+    color:'#8B6B3D', taxon:2554536, total:9744, cls:'edible', banner:'✅ Съедобная, поздняя и обильная — часто до заморозков.',
+    status:'Набирает силу: пик сентябрь–октябрь, держится до ноября.',
+    habitat:'Свежий влажный мшистый ельник, у ручьёв и на склонах. Поздняя и обильная (сен–ноя+), юг и центр; на севере реже.',
+    where:'Юг и центр Швеции: Вестергётланд, Сёдерманланд, Вестманланд, Уппланд, Сконе, Смоланд; те же леса, что и обыкновенная лисичка, но чуть позже сезоном.',
+    months:[0,0,0,0,0,4,64,1154,4343,2996,914,245],
+    regions:[['Västergötland',1736],['Södermanland',1333],['Västmanland',1014],['Uppland',965],['Skåne',702],['Småland',628],['Östergötland',432],['Dalsland',347],['Bohuslän',331],['Ångermanland',296]],
+    points:[
+      {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',date:'ориентир: старовозрастный лес'},
+      {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',date:'ориентир: хвойный массив'},
+      {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',date:'ориентир: лес у озёр'},
+      {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',date:'ориентир: хвойный, скалы, озёра'},
+      {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',date:'ориентир: смешанный лес'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',date:'ориентир: буковый лес'},
+      {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',date:'ориентир: хвойная глушь'},
+      {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',date:'ориентир: сосновый лес'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',date:'ориентир: лес и пойма'},
+      {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',date:'ориентир: ельник'}
+    ]
+  },
   black:{
     ru:'Чёрная лисичка', sci:'Craterellus cornucopioides', sw:'svart trumpetsvamp',
     color:'#3d3a34', taxon:2554662, total:3188, cls:'edible', banner:'✅ Съедобный деликатес («чёрный трюфель бедняка»).',
@@ -873,9 +928,9 @@ const SPECIES = {
     ]
   }
 };
-const ORDER=['black','regalis','matsutake'];
+const ORDER=['cib','tr','black','regalis','matsutake'];
 const MON=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-let current='black', chart=null;
+let current='cib', chart=null;
 
 // ============ КАРТА ============
 const map=L.map('map',{scrollWheelZoom:false}).setView([62.5,16.5],4);
@@ -901,7 +956,8 @@ function drawMap(){
     const a='https://maps.apple.com/?q='+p.lat+','+p.lng;
     L.marker([p.lat,p.lng],{icon:pinIcon}).bindPopup(
       '<b>'+p.loc+'</b><br><span style="color:#666">'+p.prov+' · '+p.date+'</span><br>'+
-      '<span style="font-family:monospace;font-weight:700">'+coord+'</span> <span style="color:#888">±'+(p.u!=null?p.u+' м':'—')+'</span><br>'+
+      '<span style="font-family:monospace;font-weight:700">'+coord+'</span> <span style="color:#888">±'+(p.u!=null?p.u+' м':'—')+'</span> '+
+      '<button class="copybtn" onclick="copyText(\''+coord+'\',this)">⧉ Копировать</button><br>'+
       '<a href="'+g+'" target="_blank">Google Maps</a> · <a href="'+a+'" target="_blank">Apple Maps</a>'
     ).addTo(pinLayer);
   });
