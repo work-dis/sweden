@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Leaflet 1.9.4 и Chart.js 4.4.1 встроены в файл: не зависят от unpkg/cdnjs. Тайлы карты (CARTO) и слой плотности GBIF всё равно требуют интернет. -->
-<title>Лисички в Швеции — где растут (карта мест)</title>
+<title>Прогноз грибов Швеции 2026 — где искать</title>
 <style>
 /* required styles */
 
@@ -695,436 +694,298 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 </script>
 <style>
-  :root{
-    --gold:#E8A317; --gold-d:#B8860B; --forest:#2f5233; --forest-l:#4a7c50;
-    --brown:#8B6B3D; --bg:#f6f4ee; --card:#ffffff; --ink:#25291f; --muted:#6b7161;
-    --line:#e3e0d6;
-  }
+  :root{--bg:#f5f4ef;--card:#fff;--ink:#23261f;--muted:#6c7162;--line:#e4e1d7;--accent:#3a3a34}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1060px;margin:0 auto;padding:0 18px 60px}
-  header.hero{background:linear-gradient(135deg,#2f5233 0%,#4a7c50 60%,#6a9a5f 100%);color:#fff;
-    padding:46px 18px 40px;text-align:center;position:relative;overflow:hidden}
-  header.hero:after{content:"";position:absolute;inset:0;
-    background:radial-gradient(circle at 80% 20%, rgba(232,163,23,.28), transparent 45%);pointer-events:none}
-  header.hero h1{margin:0 auto;max-width:900px;font-size:2.15rem;line-height:1.15;letter-spacing:-.01em}
-  header.hero p{margin:12px auto 0;max-width:720px;color:#eaf1e6;font-size:1.05rem}
-  .tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
-    color:#fff;border-radius:20px;padding:4px 12px;font-size:.8rem;margin-top:16px}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:-28px auto 0;max-width:1024px;
-    position:relative;z-index:2;padding:0 18px}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:center;
-    box-shadow:0 6px 20px rgba(40,50,30,.07)}
-  .stat b{display:block;font-size:1.7rem;color:var(--forest);line-height:1.1}
-  .stat span{font-size:.82rem;color:var(--muted)}
-  h2{font-size:1.5rem;margin:44px 0 6px;color:var(--forest);letter-spacing:-.01em}
-  h2 .em{color:var(--gold-d)}
-  .lead{color:var(--muted);margin:0 0 18px;max-width:820px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;
-    box-shadow:0 4px 16px rgba(40,50,30,.05);margin-top:16px}
+    background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 18px 70px}
+  header.hero{background:linear-gradient(135deg,#242a20,#3c4632 70%,#556a40);color:#fff;padding:40px 18px 34px;text-align:center}
+  header.hero h1{margin:0 auto;max-width:900px;font-size:2rem;line-height:1.15}
+  header.hero p{margin:10px auto 0;max-width:760px;color:#e7ecdf}
+  .tag{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 12px;font-size:.78rem;margin-top:14px}
+  /* species selector */
+  .selector{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:-24px auto 0;max-width:1044px;position:relative;z-index:3;padding:0 18px}
+  .sbtn{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 12px;cursor:pointer;text-align:left;transition:.15s;box-shadow:0 6px 18px rgba(30,40,20,.08)}
+  .sbtn:hover{transform:translateY(-2px)}
+  .sbtn.on{border-color:var(--sp)}
+  .sbtn .ru{font-weight:700;font-size:1.02rem;display:flex;align-items:center;gap:8px}
+  .sbtn .sci{font-style:italic;color:var(--muted);font-size:.82rem;margin-top:2px}
+  .sbtn .sw{font-size:.8rem;color:var(--muted)}
+  .chip{width:12px;height:12px;border-radius:50%;flex:none}
+  /* banner */
+  .banner{margin-top:18px;border-radius:12px;padding:12px 16px;font-weight:600;display:flex;align-items:center;gap:10px;font-size:.95rem}
+  .banner.edible{background:#e8f2e0;color:#2f5233;border:1px solid #bcd6a8}
+  .banner.poison{background:#fbe4e0;color:#9c2115;border:1px solid #f0b3aa}
+  .banner.redlist{background:#fdf1dd;color:#8a5a12;border:1px solid #eecfa0}
+  h2{font-size:1.35rem;margin:34px 0 4px;color:#2f3a26}
+  .lead{color:var(--muted);margin:0 0 14px;max-width:820px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 4px 14px rgba(30,40,20,.05);margin-top:14px}
+  .fc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}
+  .fcell{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--sp);border-radius:12px;padding:14px 16px}
+  .fcell h3{margin:0 0 6px;font-size:.95rem;color:#2f3a26;display:flex;align-items:center;gap:7px}
+  .fcell p{margin:0;font-size:.9rem;color:#3c4133}
+  .statusline{font-weight:700;color:var(--sp)}
   #map{height:560px;border-radius:12px;z-index:1}
-  .maprow{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .toggle{display:inline-flex;background:#eef1e8;border-radius:10px;padding:4px;gap:4px}
-  .toggle label{cursor:pointer;font-size:.88rem;padding:7px 13px;border-radius:8px;color:var(--muted);
-    display:flex;align-items:center;gap:7px;user-select:none}
-  .toggle input{display:none}
-  .toggle label.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12);font-weight:600}
-  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
-  .layers{display:flex;gap:16px;flex-wrap:wrap;font-size:.86rem;color:var(--ink)}
-  .layers label{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
-  .layers input{width:16px;height:16px;accent-color:var(--forest)}
-  .swatch{width:14px;height:14px;border-radius:3px;display:inline-block;vertical-align:middle}
+  .legend{font-size:.8rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;align-items:center}
+  .legend b{color:var(--ink)}
+  .sw-hex{display:inline-block;width:13px;height:13px;background:#e8552f;border-radius:3px;vertical-align:middle;margin-right:4px}
+  .note{font-size:.84rem;color:var(--muted);background:#faf8f2;border-left:3px solid var(--sp);padding:10px 14px;border-radius:6px;margin-top:12px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .chartbox{position:relative;height:330px}
-  .note{font-size:.85rem;color:var(--muted);background:#faf8f2;border-left:3px solid var(--gold);
-    padding:10px 14px;border-radius:6px;margin-top:14px}
-  .places{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
-  .pcol h3{margin:12px 0 6px;font-size:1.05rem;color:var(--forest);border-bottom:2px solid var(--line);padding-bottom:5px}
-  .place{padding:9px 0;border-bottom:1px dashed var(--line)}
-  .place b{color:var(--ink)}
-  .place .meta{font-size:.82rem;color:var(--gold-d);font-weight:600;text-transform:uppercase;letter-spacing:.02em}
-  .place .desc{font-size:.9rem;color:var(--muted)}
-  .guide{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-  .g{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
-  .g h3{margin:0 0 8px;font-size:1.12rem;color:var(--forest);display:flex;align-items:center;gap:9px}
-  .g h3 .ic{font-size:1.3rem}
-  .g ul{margin:6px 0 0;padding-left:18px}
-  .g li{margin:5px 0}
-  .g p{margin:6px 0 0}
-  .pill{display:inline-block;background:#eef3ea;color:var(--forest);border-radius:6px;
-    padding:1px 8px;font-size:.8rem;margin:2px 3px 0 0;font-weight:600}
-  table{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:6px}
-  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
-  th{color:var(--muted);font-weight:600;font-size:.82rem;text-transform:uppercase;letter-spacing:.03em}
-  td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--forest)}
-  .bar{height:8px;background:var(--gold);border-radius:4px;display:inline-block;vertical-align:middle}
-  .species{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
-  .sp{flex:1 1 220px;border:1px solid var(--line);border-radius:12px;padding:14px;background:#fcfbf7}
-  .sp b{color:var(--forest)}
-  .sp .lat{font-style:italic;color:var(--muted);font-size:.85rem}
-  .season-line{color:var(--muted);font-size:.86rem;margin-top:4px}
-  .leaflet-popup-content{font-size:.9rem;line-height:1.4}
-  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
-  footer a{color:var(--forest-l)}
+  .chartbox{position:relative;height:280px}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:4px}
+  th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.03em}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#2f3a26}
+  .bar{height:8px;background:var(--sp);border-radius:4px;display:inline-block;vertical-align:middle}
+  /* coordinate list */
+  .coordtbl td{vertical-align:middle}
+  .mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:600}
+  .copybtn{border:1px solid var(--sp);color:var(--sp);background:#fff;border-radius:7px;padding:4px 9px;font-size:.8rem;cursor:pointer;white-space:nowrap}
+  .copybtn:hover{background:var(--sp);color:#fff}
+  .maplink{font-size:.8rem;color:#2b6cb0;text-decoration:none;margin-right:8px;white-space:nowrap}
+  .maplink:hover{text-decoration:underline}
+  .u-badge{font-size:.72rem;padding:1px 6px;border-radius:5px;background:#eef1e8;color:#5b6150}
+  .u-hi{background:#fbe4e0;color:#9c2115}
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+  footer a{color:#4a7c50}
   .src{columns:2;column-gap:26px}
-  @media(max-width:760px){
-    .stats{grid-template-columns:1fr 1fr}
-    .grid2,.guide,.places{grid-template-columns:1fr}
-    header.hero h1{font-size:1.6rem}
-    #map{height:460px}
-    .src{columns:1}
-  }
+  @media(max-width:820px){.selector{grid-template-columns:1fr}.fc,.grid2{grid-template-columns:1fr}.src{columns:1}#map{height:440px}}
 </style>
 </head>
 <body>
 <header class="hero">
-  <h1>🍄 Где растут лисички в Швеции — карта мест</h1>
-  <p>Конкретные места на карте + реальная плотность находок (GBIF / Artportalen) + практический гид</p>
-  <span class="tag">Данные GBIF · 1819–2026 · карта интерактивная · обновлено 26.07.2026</span>
+  <h1>🍄 Прогноз: где искать грибы в Швеции — сезон 2026</h1>
+  <p>Три вида на выбор. Реальные находки из Artportalen (через GBIF), тепловой слой плотности, точные координаты для навигатора и честный сезонный прогноз.</p>
+  <span class="tag">Данные Artportalen/GBIF · находки 2025–2026 · сегодня: 27 июля 2026</span>
 </header>
 
-<div class="stats">
-  <div class="stat"><b>22</b><span>конкретных места-ориентира на карте</span></div>
-  <div class="stat"><b>15 715</b><span>находок обыкн. лисички в базе (Cantharellus cibarius)</span></div>
-  <div class="stat"><b>Сентябрь</b><span>пик сезона по числу находок</span></div>
-  <div class="stat"><b>~55%</b><span>всех находок — в Гёталанде (юг)</span></div>
-</div>
+<div class="selector" id="selector"></div>
 
 <div class="wrap">
+  <div id="banner" class="banner edible"></div>
 
-  <h2>Интерактивная карта: <span class="em">места и плотность находок</span></h2>
-  <p class="lead">Три слоя: 📍 <b>конкретные места</b> (нацпарки, резерваты, известные грибные леса — кликни пин);
-     🔥 <b>реальная плотность находок</b> живым слоем из GBIF (тёплые шестиугольники = где реально находили);
-     ⭕ <b>суммы по провинциям</b>. Слои включаются галочками, вид гриба — переключателем.</p>
+  <h2 id="spTitle"></h2>
+  <p class="lead" id="spSub"></p>
+
+  <div class="fc">
+    <div class="fcell"><h3>📅 Статус сезона сейчас</h3><p class="statusline" id="fcStatus"></p></div>
+    <div class="fcell"><h3>🌲 Биотоп (где растёт)</h3><p id="fcHab"></p></div>
+    <div class="fcell"><h3>🎯 Прогноз: где искать</h3><p id="fcWhere"></p></div>
+  </div>
+
+  <h2>Карта: плотность находок + точки этого/прошлого сезона</h2>
+  <p class="lead">🔥 тёплые шестиугольники — где реально находили вид (живой слой GBIF). 📍 пины — конкретные свежие находки; круг вокруг пина = точность координаты. Клик по пину — координаты и кнопки навигатора.</p>
   <div class="card">
-    <div class="maprow">
-      <div class="toggle" id="tog">
-        <label data-sp="cib" class="on"><span class="dot" style="background:#E8A317"></span>Обыкновенная лисичка</label>
-        <label data-sp="tr"><span class="dot" style="background:#8B6B3D"></span>Трубковидная</label>
-      </div>
-      <div class="layers">
-        <label><input type="checkbox" id="lPlaces" checked> 📍 Конкретные места</label>
-        <label><input type="checkbox" id="lDensity" checked> <span class="swatch" style="background:#e8552f"></span> Плотность (GBIF)</label>
-        <label><input type="checkbox" id="lBubbles"> ⭕ Суммы по провинциям</label>
-      </div>
-    </div>
     <div id="map"></div>
-    <div class="note">📍 Пины — это <b>ориентиры по районам с подходящим биотопом и репутацией у грибников</b>,
-      а не «точка, где гарантированно стоит гриб». Реальную тропу ищи на месте. 🔥 Тепловой слой — фактические
-      зарегистрированные находки. ⚠️ В нацпарках и резерватах сбор грибов «для себя» обычно разрешён, но правила
-      различаются — <b>читай аншлаги на входе</b>.</div>
+    <div class="legend">
+      <span><span class="sw-hex"></span><b>Плотность</b> находок (GBIF)</span>
+      <span>📍 <b>Свежая находка</b> (см. список ниже)</span>
+      <span>⭕ круг = радиус неточности координаты</span>
+    </div>
+    <div class="note" id="mapNote"></div>
   </div>
 
-  <h2>Конкретные места <span class="em">по регионам</span></h2>
-  <p class="lead">Тот же список, что и пины на карте — удобно читать и искать маршрут отдельно.</p>
-  <div class="card"><div class="places" id="placeList"></div></div>
-
-  <h2>Когда собирать: <span class="em">сезонность</span></h2>
-  <p class="lead">Распределение находок по месяцам. Обыкновенная лисичка идёт раньше (июль–сентябрь),
-     трубковидная — поздняя и продлевает сезон в холода (сентябрь–ноябрь и дальше).</p>
-  <div class="card">
-    <div class="chartbox"><canvas id="seasonChart"></canvas></div>
-    <div class="note">🌧️ «Магическое слово — дождь». Грибы обычно вырастают через <b>10–20 дней</b> после хорошего
-      дождя. Идеально: дождь ночью + тёплые дни. Сухое жаркое лето быстро тормозит сезон.</div>
-  </div>
-
-  <h2>Рейтинг регионов и <span class="em">баланс по стране</span></h2>
   <div class="grid2">
     <div class="card">
-      <b style="color:var(--forest)">Топ ландскапов — обыкновенная лисичка</b>
-      <div id="rankTable"></div>
+      <b style="color:#2f3a26">Сезонность по месяцам (доля находок)</b>
+      <div class="chartbox"><canvas id="seasonChart"></canvas></div>
+      <div class="legend"><span>Жёлтая колонка — текущий месяц (июль).</span></div>
     </div>
     <div class="card">
-      <b style="color:var(--forest)">Доля находок по частям страны</b>
-      <div class="chartbox" style="height:260px;margin-top:8px"><canvas id="regionChart"></canvas></div>
-      <p class="season-line" style="margin-top:12px">Гёталанд (юг) — Сконе, Смоланд, Вестергётланд, Эстергётланд, Бохуслен.
-        Свеаланд (центр) — Мэлардален вокруг Стокгольма. Норрланд (север) — хвойные массивы, где особенно много трубковидной.</p>
+      <b style="color:#2f3a26">Где больше всего находок (ландскап)</b>
+      <div id="regionTable"></div>
     </div>
   </div>
 
-  <h2>Где именно искать: <span class="em">биотоп и приметы</span></h2>
-  <div class="guide">
-    <div class="g">
-      <h3><span class="ic">🌲</span>Лес и деревья</h3>
-      <p>Лисичка — микоризный гриб, живёт в симбиозе с корнями деревьев (поэтому её <b>нельзя вырастить на грядке</b>).
-         Партнёры в Швеции:</p>
-      <div>
-        <span class="pill">ель (главный)</span><span class="pill">сосна</span><span class="pill">берёза</span>
-        <span class="pill">дуб</span><span class="pill">бук</span><span class="pill">осина</span><span class="pill">лещина</span>
-      </div>
-      <ul>
-        <li>Мшистый хвойный и смешанный лес, часто <b>зрелый/старый</b>, мало тронутый техникой.</li>
-        <li>Края, где <b>черничник (blåbärsris)</b> граничит с мхом; особенно где много берёзы.</li>
-        <li>Полутень под нижними ветвями елей — но чтобы солнце доставало.</li>
-      </ul>
-    </div>
-    <div class="g">
-      <h3><span class="ic">🧭</span>Рельеф и приметы</h3>
-      <ul>
-        <li>Каменистая, «бугристая» земля; лёгкие <b>склоны</b> — искать в нижней, более влажной части.</li>
-        <li>Вдоль <b>лесных дорожек, тропинок и мелких грунтовок</b>, у корней деревьев.</li>
-        <li>Рядом с <b>ручьями</b> и понижениями, где дольше держится влага.</li>
-        <li>Почва кислая, но хорошо дренированная; немного мха, немного травы.</li>
-        <li>Нашёл место — <b>возвращайся</b>: грибница многолетняя, лисичка растёт там годами.</li>
-      </ul>
-    </div>
-    <div class="g">
-      <h3><span class="ic">📅</span>Сезон и погода</h3>
-      <ul>
-        <li>Общий сезон: <b>июль–октябрь</b>. На юге старт с конца июня, севернее — июль–август.</li>
-        <li>Пик по данным: <b>сентябрь</b>, затем август; неделя ~37 (середина сентября) — типичный максимум.</li>
-        <li>Ключ — дождь + тепло. Проверяй лес через 10–20 дней после дождливого периода.</li>
-      </ul>
-      <p class="season-line">Регионально: район Уппсалы/Стокгольма — с середины июля до конца сентября (пик конец июля–середина августа);
-        район Гётеборга — крупнейшие сборы в августе–сентябре.</p>
-    </div>
-    <div class="g">
-      <h3><span class="ic">⚖️</span>Право сбора (Allemansrätten)</h3>
-      <ul>
-        <li>Можно <b>свободно собирать грибы</b> (не краснокнижные) почти везде, в т.ч. на частной земле —
-            кроме участков у домов и садов (tomt/hemfridszon).</li>
-        <li>В <b>нацпарках и резерватах</b> — особые правила: читай информационные щиты.</li>
-        <li>Трюфель — <b>нужно разрешение владельца</b> земли (его выкапывают).</li>
-        <li>Уважай природу и посадки, не мусори.</li>
-      </ul>
-    </div>
-  </div>
-
-  <h2>Какие лисички бывают в Швеции</h2>
-  <div class="card">
-    <div class="species">
-      <div class="sp">
-        <b>Обыкновенная лисичка</b><br><span class="lat">Cantharellus cibarius · kantarell</span>
-        <p>Жёлтая, плотная. Хвойные и смешанные леса, черничник, мшистые склоны. Основной вид, июль–сентябрь.</p>
-      </div>
-      <div class="sp">
-        <b>Трубковидная лисичка</b><br><span class="lat">Craterellus tubaeformis · trattkantarell</span>
-        <p>Свежий влажный мшистый ельник, у ручьёв и на склонах. Поздняя и обильная (сен–ноя+), юг и центр; на севере реже.</p>
-      </div>
-      <div class="sp">
-        <b>Бледная лисичка</b><br><span class="lat">Cantharellus pallens · blek kantarell</span>
-        <p>Толще и намного бледнее обычной (шляпка почти белая). Под дубом и в зарослях лещины.</p>
-      </div>
-      <div class="sp">
-        <b>Жёлтый вороночник</b><br><span class="lat">Craterellus lutescens · rödgul trumpetsvamp</span>
-        <p>Влажная <b>известковая</b> почва, у края болот и в мшистом хвойном лесу, часто у ручьёв и на мшистых пнях.</p>
-      </div>
-    </div>
-  </div>
+  <h2>📍 Точные координаты — копировать в навигатор</h2>
+  <p class="lead">Формат «широта, долгота» (WGS84) — вставляется в Google Maps, Apple Maps, Яндекс.Навигатор, maps.me и т.п. Это реальные точки наблюдений; грибница держится годами, но точность указана в столбце «±».</p>
+  <div class="card"><div id="coordList"></div></div>
 
   <footer>
-    <b>Методика.</b> Плотность и суммы — агрегированные записи наблюдений из GBIF (куда стекает шведский Artportalen):
-    facet-статистика по stateProvince/month, живой тепловой слой — density map API GBIF (country=SE). Числа отражают
-    и обилие грибов, <b>и активность наблюдателей</b> — юг и Мэлардален выглядят «богаче» отчасти из-за плотности населения.
-    Пины «конкретных мест» — известные грибные районы с подходящим биотопом (нацпарки, резерваты, популярные леса) по
-    шведским источникам; координаты приблизительные, для ориентира по району. Всегда проверяй местные правила в охраняемых зонах.
+    <b>Как это читать (честно про «прогноз»).</b> Грибница многолетняя и почти не «переезжает» — она плодоносит из года в год на тех же местах, медленно расширяясь. Поэтому лучший прогноз «где будет в этом сезоне» = где находили раньше + правильный биотоп + подходящие сроки + влага. Тепловой слой и точки показывают исторические места; идти стоит через 1–3 недели после дождя, в сезонное окно вида. Числа отражают и обилие гриба, и активность наблюдателей (на юге и в Мэлардалене репортят чаще).
+    <br><br>
+    <b>Правовое и безопасность.</b> Allemansrätten разрешает собирать съедобные грибы для себя почти везде, кроме участков у домов и охраняемых зон с ограничениями (смотри аншлаги). <b>Мухомор королевский ядовит</b> — только для опознавания. <b>Мацутаке (голиатмусерон) — краснокнижный (VU)</b>: собирай бережно, срезай зрелые, не разрушай грибницу, вноси находки в Artportalen.
     <br><br>
     <b>Источники:</b>
     <div class="src">
-      GBIF — <a href="https://www.gbif.org/species/5249504">Cantharellus cibarius</a>,
-      <a href="https://www.gbif.org/species/2554536">Craterellus tubaeformis</a>,
-      <a href="https://www.gbif.org/developer/maps">Maps API</a> ·
-      <a href="https://svampindex.se/regioner/stockholm/">Svampindex — Stockholm</a>,
-      <a href="https://svampindex.se/plocka-svamp/goteborg/">Göteborg</a>,
-      <a href="https://svampindex.se/regioner/uppsala/">Uppsala</a>,
-      <a href="https://svampindex.se/regioner/skane/">Skåne</a> ·
-      <a href="https://svampindex.se/artiklar/kantareller/">Svampindex — kantareller</a> ·
-      <a href="https://www.svt.se/nyheter/kantarellerna-ar-redan-har">SVT</a> ·
-      <a href="https://www.naturvardsverket.se/amnesomraden/allemansratten/sa-gor-vi-allemansratt/plocka-blommor-bar-och-svamp/">Naturvårdsverket — Allemansrätten</a> ·
-      <a href="https://www.nrm.se/fakta-om-naturen/vaxter/svampar/kantareller">Naturhistoriska riksmuseet</a>
+      GBIF Occurrence/Maps API (данные Artportalen / SLU Artdatabanken): <a href="https://www.gbif.org/species/2554662">Craterellus cornucopioides</a>, <a href="https://www.gbif.org/species/5240248">Amanita regalis</a>, <a href="https://www.gbif.org/species/5241820">Tricholoma matsutake</a> ·
+      <a href="https://sv.wikipedia.org/wiki/Svart_trumpetsvamp">Svart trumpetsvamp</a> ·
+      <a href="https://sv.wikipedia.org/wiki/Goliatmusseron">Goliatmusseron</a> ·
+      <a href="https://artfakta.se/taxa/6276">Artfakta — goliatmusseron</a> ·
+      <a href="https://www.naturvardsverket.se/amnesomraden/allemansratten/">Allemansrätten</a>
     </div>
   </footer>
 </div>
 
 <script>
-// ================= ДАННЫЕ =================
-// Провинции: cib = обыкновенная лисичка, tr = трубковидная
-const prov = [
-  {n:'Västergötland / Вестергётланд', lat:58.20, lng:13.40, cib:3262, tr:1736},
-  {n:'Södermanland / Сёдерманланд',    lat:59.05, lng:16.70, cib:1692, tr:1333},
-  {n:'Västmanland / Вестманланд',      lat:59.75, lng:16.10, cib:1375, tr:1014},
-  {n:'Uppland / Уппланд',              lat:59.95, lng:17.85, cib:1404, tr:965},
-  {n:'Skåne / Сконе',                  lat:55.95, lng:13.60, cib:1250, tr:702},
-  {n:'Småland / Смоланд',              lat:57.05, lng:14.90, cib:1244, tr:628},
-  {n:'Östergötland / Эстергётланд',    lat:58.35, lng:15.60, cib:900,  tr:432},
-  {n:'Bohuslän / Бохуслен',            lat:58.45, lng:11.60, cib:737,  tr:331},
-  {n:'Dalsland / Далсланд',            lat:58.90, lng:12.35, cib:534,  tr:347},
-  {n:'Värmland / Вермланд',            lat:59.75, lng:13.30, cib:455,  tr:192},
-  {n:'Västerbotten / Вестерботтен',    lat:64.70, lng:19.50, cib:430,  tr:237},
-  {n:'Närke / Нэрке',                  lat:59.10, lng:15.05, cib:397,  tr:271},
-  {n:'Dalarna / Даларна',              lat:61.10, lng:14.60, cib:316,  tr:198},
-  {n:'Halland / Халланд',              lat:56.85, lng:12.90, cib:312,  tr:215},
-  {n:'Ångermanland / Онгерманланд',    lat:63.30, lng:17.60, cib:223,  tr:296},
-  {n:'Hälsingland / Хельсингланд',     lat:61.70, lng:16.30, cib:146,  tr:99},
-  {n:'Blekinge / Блекинге',            lat:56.25, lng:15.20, cib:135,  tr:97},
-  {n:'Gästrikland / Гестрикланд',      lat:60.75, lng:16.75, cib:122,  tr:61},
-  {n:'Medelpad / Медельпад',           lat:62.50, lng:16.60, cib:108,  tr:73},
-  {n:'Gotland / Готланд',              lat:57.50, lng:18.50, cib:106,  tr:230},
-  {n:'Öland / Эланд',                  lat:56.75, lng:16.65, cib:94,   tr:61},
-  {n:'Norrbotten / Норрботтен',        lat:66.00, lng:21.50, cib:93,   tr:55},
-  {n:'Jämtland / Емтланд',             lat:63.30, lng:14.40, cib:83,   tr:89},
-  {n:'Lappland / Лаппланд',            lat:66.50, lng:18.50, cib:105,  tr:78},
-  {n:'Härjedalen / Херьедален',        lat:62.40, lng:13.40, cib:30,   tr:4}
-];
-
-// Конкретные места (ориентиры)
-const places = [
-  {name:'Tyresta nationalpark',      reg:'Стокгольм',        lat:59.18, lng:18.23, type:'Старый хвойный лес (gammelskog)', desc:'Старовозрастная тайга редкого качества у самого Стокгольма. Лисичка, белый, ежовик.'},
-  {name:'Hanvedens naturreservat',   reg:'Стокгольм (юг)',   lat:59.14, lng:17.98, type:'Большой хвойный массив',          desc:'Глубокий сплошной лес южнее города — низкий пресс сборщиков вдали от парковки.'},
-  {name:'Lunsen naturreservat',      reg:'Уппсала',          lat:59.78, lng:17.68, type:'Сосновый бор (tallhed)',          desc:'Классический выход южнее Суннерсты, сосняк на песке.'},
-  {name:'Hågadalen–Nåsten',          reg:'Уппсала',          lat:59.83, lng:17.55, type:'Смешанный лес',                   desc:'Резерват к западу от города, удобный и продуктивный.'},
-  {name:'Delsjöområdet',             reg:'Гётеборг',         lat:57.68, lng:12.08, type:'Смешанный/хвойный у озёр',        desc:'Ближний к городу лес: лисичка, белый, трубковидная после дождя.'},
-  {name:'Vättlefjäll naturreservat', reg:'Гётеборг (север)', lat:57.82, lng:12.10, type:'Хвойный, скалы и озёра',          desc:'Большой лесной массив, хорошая грибная репутация.'},
-  {name:'Risveden',                  reg:'сев-вост. Гётеборга',lat:58.02,lng:12.30, type:'Старый лес',                     desc:'Массив старого леса, известен грибникам.'},
-  {name:'Svartedalens naturreservat',reg:'Бохуслен',         lat:58.12, lng:12.05, type:'Хвойный, много озёр',            desc:'Дикая лесная глушь к северу от Гётеборга.'},
-  {name:'Garphyttans nationalpark',  reg:'Эребру / Нэрке',   lat:59.33, lng:14.90, type:'Смешанный лес у Кильсбергена',    desc:'Один из лучших районов Эребру для лисичек.'},
-  {name:'Kilsbergen',                reg:'Эребру / Нэрке',   lat:59.42, lng:14.85, type:'Лесной кряж',                     desc:'Протяжённая гряда хвойного леса западнее Эребру.'},
-  {name:'Söderåsens nationalpark',   reg:'Сконе',            lat:56.05, lng:13.23, type:'Буковый и смешанный лес',         desc:'Классическая цель Сконе; в смешанных участках — лисичка.'},
-  {name:'Skrylle naturreservat',     reg:'Сконе (Лунд/Далбю)',lat:55.70,lng:13.35, type:'Смешанный лес',                  desc:'Популярный лес между Лундом и Далбю.'},
-  {name:'Torup (bokskog)',           reg:'Сконе (юг Мальмё)',lat:55.53, lng:13.18, type:'Буковый лес',                     desc:'Буковый массив южнее Мальмё.'},
-  {name:'Hallandsåsen',              reg:'Сконе / Халланд',  lat:56.35, lng:12.90, type:'Лесистые склоны',                 desc:'Склоны гряды — хорошая влажность и биотоп.'},
-  {name:'Tiveden nationalpark',      reg:'Эребру / Вестра-Гёталанд',lat:58.72,lng:14.60,type:'Старый скалистый хвойный лес',desc:'Дикий валунный лес на водоразделе — упоминается как грибная цель.'},
-  {name:'Glaskogens naturreservat',  reg:'Вермланд',         lat:59.45, lng:12.75, type:'Хвойная глушь',                   desc:'Огромный лесной резерват — грибы и ягоды.'},
-  {name:'Hökensås',                  reg:'Вестергётланд',    lat:58.10, lng:14.05, type:'Сосняк на песке',                 desc:'Песчаная гряда, известна ягодами и грибами.'},
-  {name:'Norra Kvill nationalpark',  reg:'Смоланд',          lat:57.85, lng:15.63, type:'Старый хвойный лес',              desc:'Островок старовозрастного леса.'},
-  {name:'Åsnens nationalpark',       reg:'Смоланд',          lat:56.63, lng:14.70, type:'Смешанный лес у озера',           desc:'Озёрный ландшафт с лесистыми берегами и островами.'},
-  {name:'Tresticklan nationalpark',  reg:'Далсланд',         lat:59.03, lng:11.87, type:'Сосновый лес',                    desc:'Дикий хвойный массив у норвежской границы.'},
-  {name:'Färnebofjärdens np.',       reg:'Даларна/Гестрикланд',lat:60.20,lng:16.78,type:'Хвойный лес и пойма',            desc:'Мозаика леса и воды на нижнем Даль-эльвене.'},
-  {name:'Skuleskogens np.',          reg:'Онгерманланд (Höga Kusten)',lat:63.09,lng:18.48,type:'Ельник',                  desc:'Крутой прибрежный ельник Высокого берега — север.'}
-];
-
-// ================= КАРТА =================
-const TAX = {cib:5249504, tr:2554536};
-let species = 'cib';
-
-const map = L.map('map',{scrollWheelZoom:false}).setView([62.4,16.5],4);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-  attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:12
-}).addTo(map);
-map.fitBounds([[55.2,11.0],[68.5,24.0]]);
-
-// --- Слой: плотность GBIF (тайлы) ---
-let densityLayer=null;
-function densityUrl(sp){
-  return 'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?'+
-         'taxonKey='+TAX[sp]+'&country=SE&bin=hex&hexPerTile=32&style=classic-noborder.poly';
-}
-function refreshDensity(){
-  if(densityLayer){map.removeLayer(densityLayer);densityLayer=null;}
-  if(document.getElementById('lDensity').checked){
-    densityLayer=L.tileLayer(densityUrl(species),{opacity:0.72,maxZoom:12,attribution:'Плотность: GBIF'}).addTo(map);
+// ============ ДАННЫЕ (Artportalen через GBIF) ============
+const TODAY_M = 7; // июль
+const SPECIES = {
+  black:{
+    ru:'Чёрная лисичка', sci:'Craterellus cornucopioides', sw:'svart trumpetsvamp',
+    color:'#3d3a34', taxon:2554662, total:3188, cls:'edible', banner:'✅ Съедобный деликатес («чёрный трюфель бедняка»).',
+    status:'Рано. Единичные в конце июля, массово — сентябрь–октябрь.',
+    habitat:'Микориза с буком, дубом, лещиной. Влажный лиственный/смешанный лес, богатая известковая почва; склоны к ручьям и овраги в буковом лесу. Прячется под листвой и во мху.',
+    where:'Юг и центр-восток: Мэлардален (Сёдерманланд, Уппланд, Вестманланд), Сконе, Смоланд, Эстергётланд. Осмотри буково-дубовые склоны у воды после дождей.',
+    months:[3,1,2,1,2,1,34,597,1737,610,80,9],
+    regions:[['Södermanland',529],['Uppland',517],['Skåne',419],['Småland',260],['Västmanland',211],['Västergötland',201],['Östergötland',114],['Värmland',100],['Närke',99],['Halland',77]],
+    points:[
+      {lat:59.496509,lng:12.704351,u:4,loc:'Arvika',prov:'Värmland',date:'2025-07-31'},
+      {lat:61.19889,lng:16.1762,u:10,loc:'Svarttjärnsbäcken',prov:'Hälsingland',date:'2025-08-07'},
+      {lat:61.22871,lng:16.02683,u:10,loc:'Stavbergtjärnsbäcken',prov:'Hälsingland',date:'2025-08-07'},
+      {lat:59.412933,lng:12.5587,u:100,loc:'Arvika (Vik)',prov:'Värmland',date:'2025-08-16'},
+      {lat:59.69148,lng:15.29709,u:1500,loc:'Jättåkerskogen, Ramsberg',prov:'Västmanland',date:'2025-07-26'},
+      {lat:58.96912,lng:16.301861,u:25031,loc:'Katrineholm (обфусцировано наблюдателем)',prov:'Södermanland',date:'2025-08-04'}
+    ]
+  },
+  regalis:{
+    ru:'Мухомор королевский', sci:'Amanita regalis', sw:'brun flugsvamp',
+    color:'#7c4a2d', taxon:5240248, total:4495, cls:'poison', banner:'⚠️ ЯДОВИТ — НЕ собирать в пищу. Содержит иботеновую кислоту/мусцимол. Только для опознавания.',
+    status:'Уже пошёл: есть находки июня–июля 2026. Пик — август, далее сентябрь.',
+    habitat:'Микориза с елью и берёзой; хвойные и смешанные леса, часто мшистые/черничные, бореальные и горные. Похож на красный мухомор, но шляпка коричнево-бронзовая с жёлтыми хлопьями.',
+    where:'Широко в Гёталанде/Свеаланде и в Норрланде; на самом юге (Сконе) редок. Ищи (для опознавания) в еловых и берёзовых лесах, там же где белые и лисички.',
+    months:[2,0,0,0,2,26,639,2059,1521,149,11,0],
+    regions:[['Västergötland',1065],['Västmanland',663],['Södermanland',433],['Uppland',294],['Småland',216],['Dalarna',210],['Bohuslän',181],['Västerbotten',175],['Jämtland',158],['Värmland',155]],
+    points:[
+      {lat:58.57513,lng:13.39433,u:10,loc:'Bestorp',prov:'Västergötland (Götene)',date:'2026-07-01'},
+      {lat:58.53259,lng:13.50125,u:10,loc:'P-ängen',prov:'Västergötland (Götene)',date:'2026-07-10'},
+      {lat:58.036367,lng:12.420922,u:124,loc:'Skepplandavägen, Alingsås',prov:'V. Götaland (Ale)',date:'2026-07-02'},
+      {lat:57.78151,lng:16.27251,u:100,loc:'Broholm, Hummelstad',prov:'Småland (Västervik)',date:'2026-06-24'},
+      {lat:58.07545,lng:16.34037,u:500,loc:'Fieberg',prov:'Småland (Västervik)',date:'2026-06-18'},
+      {lat:62.66267,lng:17.63357,u:125,loc:'Brunne',prov:'Ångermanland (Härnösand)',date:'2026-07-14'}
+    ]
+  },
+  matsutake:{
+    ru:'Мацутаке (голиаф)', sci:'Tricholoma matsutake', sw:'goliatmusseron',
+    color:'#9c7b3f', taxon:5241820, total:5573, cls:'redlist', banner:'🟡 Съедобный и ценный, НО краснокнижный (IUCN VU). Собирай бережно, не разрушай грибницу, вноси находки в Artportalen.',
+    status:'Рано. Основной сезон — конец августа, сентябрь (пик), октябрь.',
+    habitat:'Сухие открытые песчаные сосновые боры (tallhedar), лишайниковый покров; нужны сосна + песок + непрерывность старого леса. Медленная, «капризная» грибница.',
+    where:'В основном Норрланд от Эрншёльдсвика на север (Лаппланд, Вестерботтен, Онгерманланд) и Даларна; южнее — редкие очаги на бедных песках/скальных сосняках (напр. Slättö sand в Смоланде, есть точки в Сёдерманланде).',
+    months:[30,0,0,0,11,1,8,2100,3113,214,7,1],
+    regions:[['Lule lappmark',1127],['Västerbotten',1124],['Ångermanland',548],['Norrbotten',502],['Dalarna',409],['Härjedalen',320],['Lycksele lappmark',298],['Torne lappmark',284],['Jämtland',221],['Södermanland',185]],
+    points:[
+      {lat:57.11076,lng:13.75348,u:150,loc:'Slättö sand (природный резерват)',prov:'Småland (Värnamo)',date:'2025-08-10'},
+      {lat:59.61886,lng:15.48098,u:10,loc:'Södra Gröningsmossen',prov:'Västmanland (Lindesberg)',date:'2025-08-15'},
+      {lat:59.23941,lng:17.53073,u:200,loc:'Malmsjön',prov:'Södermanland (Södertälje)',date:'2025-08-24'},
+      {lat:61.48494,lng:16.85937,u:213,loc:'Lindefallet (tallhed)',prov:'Hälsingland (Hudiksvall)',date:'2025-08-20'},
+      {lat:66.48744,lng:20.6559,u:10,loc:'Porsi, Norrimyrtjärnen',prov:'Lule lappmark (Jokkmokk)',date:'2025-08-30'},
+      {lat:67.87805,lng:20.98652,u:10,loc:'Esrange ravin',prov:'Torne lappmark (Kiruna)',date:'2025-08-31'}
+    ]
   }
-}
+};
+const ORDER=['black','regalis','matsutake'];
+const MON=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+let current='black', chart=null;
 
-// --- Слой: суммы по провинциям (кружки) ---
-const bubbleLayer=L.layerGroup();
-const bColors={cib:{fill:'#E8A317',stroke:'#B8860B'}, tr:{fill:'#8B6B3D',stroke:'#5c4526'}};
-function drawBubbles(){
-  bubbleLayer.clearLayers();
-  const c=bColors[species];
-  prov.forEach(d=>{
-    const v=d[species], r=4+Math.sqrt(v)*0.33;
-    L.circleMarker([d.lat,d.lng],{radius:r,fillColor:c.fill,color:c.stroke,weight:1.5,fillOpacity:.5})
-      .bindPopup('<b>'+d.n+'</b><br>Лисичка обыкн.: <b>'+d.cib+'</b><br>Трубковидная: <b>'+d.tr+'</b>')
-      .addTo(bubbleLayer);
+// ============ КАРТА ============
+const map=L.map('map',{scrollWheelZoom:false}).setView([62.5,16.5],4);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:13}).addTo(map);
+map.fitBounds([[55.2,11.0],[69.0,24.5]]);
+let densityLayer=null, pinLayer=L.layerGroup().addTo(map);
+
+function densityUrl(taxon){
+  return 'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?taxonKey='+taxon+'&country=SE&bin=hex&hexPerTile=30&style=classic-noborder.poly';
+}
+function drawMap(){
+  const s=SPECIES[current];
+  if(densityLayer) map.removeLayer(densityLayer);
+  densityLayer=L.tileLayer(densityUrl(s.taxon),{opacity:.72,maxZoom:13}).addTo(map);
+  pinLayer.clearLayers();
+  const pinIcon=L.divIcon({html:'<div style="font-size:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))">📍</div>',className:'',iconSize:[22,22],iconAnchor:[11,21],popupAnchor:[0,-18]});
+  s.points.forEach(p=>{
+    if(p.u && p.u>50){
+      L.circle([p.lat,p.lng],{radius:p.u,color:s.color,weight:1,fillColor:s.color,fillOpacity:.08,dashArray:'3'}).addTo(pinLayer);
+    }
+    const coord=p.lat.toFixed(5)+', '+p.lng.toFixed(5);
+    const g='https://www.google.com/maps?q='+p.lat+','+p.lng;
+    const a='https://maps.apple.com/?q='+p.lat+','+p.lng;
+    L.marker([p.lat,p.lng],{icon:pinIcon}).bindPopup(
+      '<b>'+p.loc+'</b><br><span style="color:#666">'+p.prov+' · '+p.date+'</span><br>'+
+      '<span style="font-family:monospace;font-weight:700">'+coord+'</span> <span style="color:#888">±'+(p.u!=null?p.u+' м':'—')+'</span><br>'+
+      '<a href="'+g+'" target="_blank">Google Maps</a> · <a href="'+a+'" target="_blank">Apple Maps</a>'
+    ).addTo(pinLayer);
   });
 }
-function refreshBubbles(){
-  drawBubbles();
-  if(document.getElementById('lBubbles').checked){bubbleLayer.addTo(map);} else {map.removeLayer(bubbleLayer);}
-}
 
-// --- Слой: конкретные места (пины) ---
-const placeLayer=L.layerGroup();
-const pinIcon=L.divIcon({html:'<div style="font-size:24px;line-height:24px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.45))">📍</div>',className:'',iconSize:[24,24],iconAnchor:[12,23],popupAnchor:[0,-20]});
-places.forEach(p=>{
-  L.marker([p.lat,p.lng],{icon:pinIcon})
-    .bindPopup('<b>'+p.name+'</b><br><span style="color:#B8860B;font-weight:600">'+p.reg+' · '+p.type+'</span><br>'+p.desc)
-    .bindTooltip(p.name,{direction:'top'})
-    .addTo(placeLayer);
-});
-function refreshPlaces(){
-  if(document.getElementById('lPlaces').checked){placeLayer.addTo(map);} else {map.removeLayer(placeLayer);}
-}
-
-// init layers
-refreshPlaces(); refreshDensity(); refreshBubbles();
-
-// species switch
-document.querySelectorAll('#tog label').forEach(l=>{
-  l.addEventListener('click',()=>{
-    document.querySelectorAll('#tog label').forEach(x=>x.classList.remove('on'));
-    l.classList.add('on'); species=l.dataset.sp;
-    refreshDensity(); refreshBubbles();
+// ============ ГРАФИК СЕЗОНА ============
+function drawChart(){
+  const s=SPECIES[current];
+  const colors=s.months.map((v,i)=> i+1===TODAY_M ? '#e0b000' : s.color);
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById('seasonChart'),{
+    type:'bar',
+    data:{labels:MON,datasets:[{data:s.months,backgroundColor:colors,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+' находок'}}},
+      scales:{y:{beginAtZero:true,title:{display:true,text:'находок'}}}}
   });
+}
+
+// ============ РЕГИОНЫ ============
+function drawRegions(){
+  const s=SPECIES[current], max=s.regions[0][1];
+  let h='<table><thead><tr><th>#</th><th>Ландскап</th><th></th><th class="num">Находок</th></tr></thead><tbody>';
+  s.regions.forEach((r,i)=>{const w=Math.round(r[1]/max*110);
+    h+='<tr><td>'+(i+1)+'</td><td>'+r[0]+'</td><td><span class="bar" style="width:'+w+'px"></span></td><td class="num">'+r[1]+'</td></tr>';});
+  h+='</tbody></table>';
+  document.getElementById('regionTable').innerHTML=h;
+}
+
+// ============ СПИСОК КООРДИНАТ ============
+function drawCoords(){
+  const s=SPECIES[current];
+  let h='<table class="coordtbl"><thead><tr><th>Координаты (шир., долг.)</th><th>±</th><th>Место / провинция</th><th>Дата</th><th>Навигатор</th></tr></thead><tbody>';
+  s.points.forEach((p,i)=>{
+    const coord=p.lat.toFixed(5)+', '+p.lng.toFixed(5);
+    const g='https://www.google.com/maps?q='+p.lat+','+p.lng;
+    const a='https://maps.apple.com/?q='+p.lat+','+p.lng;
+    const uCls=(p.u!=null&&p.u>2000)?'u-badge u-hi':'u-badge';
+    const uTxt=(p.u!=null)?('±'+(p.u>=1000?(p.u/1000)+' км':p.u+' м')):'—';
+    h+='<tr>'+
+       '<td><span class="mono">'+coord+'</span> <button class="copybtn" data-c="'+coord+'">⧉ Копировать</button></td>'+
+       '<td><span class="'+uCls+'">'+uTxt+'</span></td>'+
+       '<td>'+p.loc+'<br><span style="color:#8a8f7e;font-size:.82rem">'+p.prov+'</span></td>'+
+       '<td style="white-space:nowrap">'+p.date+'</td>'+
+       '<td><a class="maplink" href="'+g+'" target="_blank">Google</a><a class="maplink" href="'+a+'" target="_blank">Apple</a></td>'+
+       '</tr>';
+  });
+  h+='</tbody></table>';
+  document.getElementById('coordList').innerHTML=h;
+  document.querySelectorAll('#coordList .copybtn').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.c,b)));
+}
+function copyText(txt,btn){
+  const ok=()=>{const o=btn.textContent;btn.textContent='✓ Скопировано';setTimeout(()=>btn.textContent=o,1400);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok).catch(()=>fb(txt,ok));}else fb(txt,ok);
+}
+function fb(txt,ok){const t=document.createElement('textarea');t.value=txt;t.style.position='fixed';t.style.opacity=0;document.body.appendChild(t);t.focus();t.select();try{document.execCommand('copy');ok();}catch(e){}document.body.removeChild(t);}
+
+// ============ ПАНЕЛЬ ВИДА ============
+function render(){
+  const s=SPECIES[current];
+  document.documentElement.style.setProperty('--sp',s.color);
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('on',b.dataset.k===current));
+  const b=document.getElementById('banner'); b.className='banner '+s.cls; b.textContent=s.banner;
+  document.getElementById('spTitle').textContent=s.ru+' — прогноз и точки';
+  document.getElementById('spSub').innerHTML='<i>'+s.sci+'</i> · швед. <b>'+s.sw+'</b> · всего находок в базе: <b>'+s.total.toLocaleString('ru-RU')+'</b>';
+  document.getElementById('fcStatus').textContent=s.status;
+  document.getElementById('fcHab').textContent=s.habitat;
+  document.getElementById('fcWhere').textContent=s.where;
+  document.getElementById('mapNote').innerHTML='📍 Показаны '+s.points.length+' свежих находок. Пины — ориентир по месту; грибница держится годами, но иди в сезонное окно и через 1–3 недели после дождя.'+
+    (s.cls==='poison'?' <b style="color:#9c2115">Вид ядовит — точки только для опознавания.</b>':'')+
+    (s.cls==='redlist'?' <b style="color:#8a5a12">Вид краснокнижный — собирай бережно.</b>':'');
+  drawMap(); drawChart(); drawRegions(); drawCoords();
+}
+
+// селектор
+const sel=document.getElementById('selector');
+ORDER.forEach(k=>{const s=SPECIES[k];
+  const d=document.createElement('div'); d.className='sbtn'; d.dataset.k=k; d.style.setProperty('--sp',s.color);
+  d.innerHTML='<div class="ru"><span class="chip" style="background:'+s.color+'"></span>'+s.ru+'</div>'+
+    '<div class="sci">'+s.sci+'</div><div class="sw">швед.: '+s.sw+' · '+s.total.toLocaleString('ru-RU')+' находок</div>';
+  d.addEventListener('click',()=>{current=k;render();});
+  sel.appendChild(d);
 });
-// layer checkboxes
-document.getElementById('lPlaces').addEventListener('change',refreshPlaces);
-document.getElementById('lDensity').addEventListener('change',refreshDensity);
-document.getElementById('lBubbles').addEventListener('change',refreshBubbles);
-
-// ================= СПИСОК МЕСТ =================
-(function(){
-  const groups={};
-  const order=['Стокгольм','Стокгольм (юг)','Уппсала','Гётеборг','Гётеборг (север)','сев-вост. Гётеборга','Бохуслен',
-    'Эребру / Нэрке','Сконе','Сконе (Лунд/Далбю)','Сконе (юг Мальмё)','Сконе / Халланд','Эребру / Вестра-Гёталанд',
-    'Вермланд','Вестергётланд','Смоланд','Далсланд','Даларна/Гестрикланд','Онгерманланд (Höga Kusten)'];
-  places.forEach(p=>{(groups[p.reg]=groups[p.reg]||[]).push(p);});
-  // Собираем в две колонки по крупным зонам
-  const zones=[
-    {t:'Юг — Сконе, Халланд, Смоланд', regs:['Сконе','Сконе (Лунд/Далбю)','Сконе (юг Мальмё)','Сконе / Халланд','Смоланд']},
-    {t:'Запад — Гётеборг, Бохуслен, Вестергётланд, Вермланд', regs:['Гётеборг','Гётеборг (север)','сев-вост. Гётеборга','Бохуслен','Вестергётланд','Вермланд','Далсланд']},
-    {t:'Центр — Стокгольм, Уппсала, Эребру', regs:['Стокгольм','Стокгольм (юг)','Уппсала','Эребру / Нэрке','Эребру / Вестра-Гёталанд']},
-    {t:'Север и внутренние районы', regs:['Даларна/Гестрикланд','Онгерманланд (Höga Kusten)']}
-  ];
-  const colA=[zones[0],zones[2]], colB=[zones[1],zones[3]];
-  function renderCol(zs){
-    let h='';
-    zs.forEach(z=>{
-      h+='<h3>'+z.t+'</h3>';
-      places.filter(p=>z.regs.indexOf(p.reg)>=0).forEach(p=>{
-        h+='<div class="place"><b>'+p.name+'</b> <span class="meta">'+p.reg+'</span>'+
-           '<div class="desc">'+p.type+' — '+p.desc+'</div></div>';
-      });
-    });
-    return h;
-  }
-  document.getElementById('placeList').innerHTML=
-    '<div class="pcol">'+renderCol(colA)+'</div><div class="pcol">'+renderCol(colB)+'</div>';
-})();
-
-// ================= ГРАФИКИ =================
-new Chart(document.getElementById('seasonChart'),{
-  type:'bar',
-  data:{labels:['Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
-    datasets:[
-      {label:'Обыкновенная лисичка', data:[465,2475,4558,5325,1837,508,165], backgroundColor:'#E8A317', borderRadius:5},
-      {label:'Трубковидная',         data:[4,64,1154,4343,2996,914,245],     backgroundColor:'#8B6B3D', borderRadius:5}
-    ]},
-  options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+' находок'}}},
-    scales:{y:{beginAtZero:true,title:{display:true,text:'число находок'}}}}
-});
-
-new Chart(document.getElementById('regionChart'),{
-  type:'doughnut',
-  data:{labels:['Гёталанд (юг) ~55%','Свеаланд (центр) ~36%','Норрланд (север) ~9%'],
-    datasets:[{data:[8574,5639,1340],backgroundColor:['#E8A317','#4a7c50','#8B6B3D'],borderWidth:2,borderColor:'#fff'}]},
-  options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
-    plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+' ('+c.parsed+' находок)'}}}}
-});
-
-// ================= ТАБЛИЦА РЕЙТИНГА =================
-(function(){
-  const top=[...prov].sort((a,b)=>b.cib-a.cib).slice(0,12), max=top[0].cib;
-  let html='<table><thead><tr><th>#</th><th>Ландскап</th><th></th><th class="num">Находок</th></tr></thead><tbody>';
-  top.forEach((d,i)=>{const w=Math.round(d.cib/max*120);
-    html+='<tr><td>'+(i+1)+'</td><td>'+d.n.split(' / ')[1]+'</td><td><span class="bar" style="width:'+w+'px"></span></td>'+
-          '<td class="num">'+d.cib.toLocaleString('ru-RU')+'</td></tr>';});
-  html+='</tbody></table>';
-  document.getElementById('rankTable').innerHTML=html;
-})();
+render();
 </script>
 </body>
 </html>
