@@ -82,6 +82,30 @@
 бедных скальных сосняках. Категория VU относится к Красному списку Швеции
 2025, а не к глобальному Красному списку IUCN.
 
+## Дополнение: восток и северо-восток Karlstad
+
+Пустота между Karlstad, Molkom и Brattfors на первоначальной карте не означала
+отсутствие леса. Светлая подложка CARTO почти не отображала лесной покров, а
+значки 🌲 ставились только для ограниченного ручного списка территорий.
+
+В проект добавлена подложка OpenStreetMap, где лесные массивы видны зелёным, и
+четыре проверенные территории:
+
+- **Råglandaberget** — старый сосняк на вершине и богатый смешанный лиственный
+  лес с лещиной, липой, клёном, вязом и ясенем на основной гиперитовой породе;
+- **Nedre Prostgårdsälven** — влажный овражный смешанный лес на глинистой почве
+  с высокой долей лиственных пород;
+- **Lämpenshålan** — сухой песчаный `tallhed` с сосной, мхами, лишайниками,
+  черникой и брусникой;
+- **Kittelfältet / Brattforsheden** — песчаные ледниковые гряды и старый
+  сосновый лес, рядом с мозаикой болот, озёр и влажных оврагов.
+
+Территории добавлены только к тем видам, для которых подходит конкретный
+микробиотоп. Например, Råglandaberget особенно интересен для чёрной лисички,
+Nedre Prostgårdsälven — для трубковидной и чёрной лисичек, а Lämpenshålan и
+Kittelfältet — как кандидаты для обследования мацутаке. Это экологическое
+сопоставление, не подтверждение находки.
+
 ## Как трактовать матрицу
 
 «Высокая вероятность» означает экологически характерный тип леса, а не
@@ -92,6 +116,39 @@
 - сезон и погода предшествующих недель;
 - сохранённая грибница;
 - отсутствие локального запрета на сбор.
+
+## Геомодель Vålberg–Karlstad
+
+Для района на пользовательском примере добавлен непрерывный расчётный растр,
+а не новые вручную расставленные значки. Он построен на открытых данных
+Skogsstyrelsen/SLU по Värmlands län:
+
+- объём сосны, ели, берёзы, дуба и бука из SLU Skogskarta;
+- средний диаметр как грубый прокси структуры/зрелости древостоя;
+- SLU Markfuktighet: классы `torr–frisk`, `frisk–fuktig`,
+  `fuktig–blöt`.
+
+Для каждого вида отдельно рассчитываются совместимость деревьев-хозяев,
+предпочтение влажности и вклад среднего диаметра. Затем результат умножается
+на мягкую маску общей древесной структуры. Итог нормирован в диапазон 0–100.
+Наблюдения GBIF в формулу не входят и показываются независимым слоем.
+
+Ограничения модели:
+
+- это пригодность биотопа, а не вероятность находки или урожая;
+- средний диаметр не равен возрасту леса;
+- в породном растре нет отдельного слоя лещины, липы и ольхи, поэтому модель
+  чёрной лисички особенно консервативна;
+- тип почвы, кислотность, непрерывность грибницы и погода последних недель в
+  расчёт не входят;
+- рубки меняются быстрее статических растров, поэтому заявки и выполненные
+  рубки подключены как отдельные живые WMS-слои Skogsstyrelsen и должны
+  проверяться перед поездкой.
+
+Исходные породные растра имеют ячейку 12,5 × 12,5 м. Для браузера они
+перепроецированы и агрегированы в компактную сетку; это не повышает точность
+исходных данных. Код расчёта сохранён в `scripts/build_varmland_habitat.py`,
+метаданные результата — в `assets/habitat/metadata.json`.
 
 ## Основные источники
 
@@ -107,3 +164,11 @@
 - [Länsstyrelsen Uppsala: Norra Lunsen](https://www.lansstyrelsen.se/uppsala/besoksmal/naturreservat/norra-lunsen.html)
 - [Sveriges nationalparker: Söderåsen](https://www.sverigesnationalparker.se/soderasen)
 - [Sveriges nationalparker: Färnebofjärden](https://www.sverigesnationalparker.se/upptack-nationalparkerna/farnebofjardens-nationalpark)
+- [Länsstyrelsen Värmland: Råglandaberget](https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/raglandaberget.html)
+- [Länsstyrelsen Värmland: Nedre Prostgårdsälven](https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/nedre-prostgardsalven.html)
+- [Länsstyrelsen Värmland: Lämpenshålan](https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/lampenshalan.html)
+- [Länsstyrelsen Värmland: Kittelfältet](https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/kittelfaltet.html)
+- [Länsstyrelsen Värmland: Brattforsheden](https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/brattforsheden.html)
+- [Skogsstyrelsen: описания геоданных](https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/skogsstyrelsens-geodata/)
+- [Skogsstyrelsen: загрузка геоданных](https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/geodatatjanster/ladda-ner-geodata/)
+- [Skogsstyrelsen: техническое описание SLU Markfuktighet](https://www.skogsstyrelsen.se/globalassets/sjalvservice/karttjanster/geodatatjanster/teknisk-beskrivning/raster-markfuktighetskarta-slu---teknisk-beskrivning.pdf)

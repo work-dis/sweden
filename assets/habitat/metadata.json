@@ -1,0 +1,55 @@
+{
+  "model": "varmland-habitat-v1",
+  "generated": "2026-07-27",
+  "bboxWgs84": [
+    12.7,
+    59.25,
+    14.25,
+    59.52
+  ],
+  "width": 1800,
+  "height": 720,
+  "cellSourceMetres": 12.5,
+  "scoreMeaning": "habitat suitability, not mushroom occurrence probability",
+  "inputs": {
+    "pine": "sksSLUskogskartaTallVolym17.tif",
+    "spruce": "sksSLUskogskartaGranVolym17.tif",
+    "birch": "birch.tif",
+    "oak": "sksSLUskogskartaEkVolym17.tif",
+    "beech": "sksSLUskogskartaBokVolym17.tif",
+    "diameter": "sksSLUskogskartaMedeldiameter17.tif",
+    "moisture": "sksSLUmfMarkfuktighet_klassad17.tif"
+  },
+  "moistureClasses": {
+    "1": "dry-fresh",
+    "2": "fresh-moist",
+    "3": "moist-wet"
+  },
+  "stats": {
+    "cib": {
+      "p50": 65.0,
+      "p90": 78.5,
+      "max": 92.2
+    },
+    "tr": {
+      "p50": 49.9,
+      "p90": 70.1,
+      "max": 96.9
+    },
+    "black": {
+      "p50": 28.0,
+      "p90": 39.1,
+      "max": 94.7
+    },
+    "regalis": {
+      "p50": 58.4,
+      "p90": 71.6,
+      "max": 85.6
+    },
+    "matsutake": {
+      "p50": 44.5,
+      "p90": 67.9,
+      "max": 92.2
+    }
+  }
+}

@@ -729,6 +729,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .legend{font-size:.8rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;align-items:center}
   .legend b{color:var(--ink)}
   .sw-hex{display:inline-block;width:13px;height:13px;background:#e8552f;border-radius:3px;vertical-align:middle;margin-right:4px}
+  .sw-habitat{display:inline-block;width:48px;height:10px;border-radius:5px;vertical-align:middle;margin-right:5px;background:linear-gradient(90deg,#fae13c,#e8a317,#9b3152)}
+  .map-tools{display:grid;grid-template-columns:minmax(260px,1fr) 1.7fr;gap:12px;margin-top:12px}
+  .model-box{background:#f3f7ed;border:1px solid #d7e2ca;border-radius:10px;padding:11px 13px;font-size:.82rem;color:#4b5740}
+  .model-box b{color:#283423}
+  .model-box button{border:1px solid #526d45;background:#fff;color:#36502e;border-radius:7px;padding:5px 9px;margin-top:7px;cursor:pointer}
+  .model-box button.on{background:#3f5c35;color:#fff}
+  .score-pop{min-width:230px}
+  .score-pop .score{font-size:1.25rem;font-weight:800;color:var(--sp)}
+  .score-pop .coords{font:600 .82rem ui-monospace,SFMono-Regular,Menlo,monospace;color:#62695a}
+  .leaflet-control-layers-toggle{background-image:none!important;text-decoration:none}
+  .leaflet-control-layers-toggle::before{content:'🗺️';display:grid;place-items:center;width:100%;height:100%;font-size:20px}
   .note{font-size:.84rem;color:var(--muted);background:#faf8f2;border-left:3px solid var(--sp);padding:10px 14px;border-radius:6px;margin-top:12px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .forest-guide{overflow-x:auto}
@@ -755,7 +766,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
   footer a{color:#4a7c50}
   .src{columns:2;column-gap:26px}
-  @media(max-width:820px){.selector{grid-template-columns:1fr}.fc,.grid2{grid-template-columns:1fr}.src{columns:1}#map{height:440px}}
+  @media(max-width:820px){.selector{grid-template-columns:1fr}.fc,.grid2,.map-tools{grid-template-columns:1fr}.src{columns:1}#map{height:440px}}
 </style>
 </head>
 <body>
@@ -812,15 +823,28 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="note">* Чёрная лисичка прежде всего связана с богатыми лиственными лесами — буком, дубом и лещиной. В ельнике или пойме она правдоподобна только при наличии подходящих лиственных деревьев и богатой, часто известковой или глинистой почвы.</div>
   </div>
 
-  <h2>Карта: плотность находок + точки этого/прошлого сезона</h2>
-  <p class="lead">🔥 тёплые шестиугольники — где реально находили вид (живой слой GBIF). 📍 пины — конкретные свежие находки; круг вокруг пина = точность координаты. Клик по пину — координаты и кнопки навигатора.</p>
+  <h2>Карта: лесной биотоп + наблюдения</h2>
+  <p class="lead">Цветной растр в районе Vålberg–Karlstad рассчитывается из породного состава, влажности и среднего диаметра леса. Кликни по карте — увидишь координаты и оценку выбранного гриба. В меню справа можно включить официальные лесные объекты и вырубки.</p>
   <div class="card">
     <div id="map"></div>
     <div class="legend">
+      <span><span class="sw-habitat"></span><b>Пригодность лесного биотопа:</b> слабая → высокая</span>
       <span><span class="sw-hex"></span><b>Плотность</b> находок (GBIF)</span>
       <span>📍 <b>Свежая находка</b> (см. список ниже)</span>
       <span>🌲 <b>Кандидатный биотоп</b> — описание леса подходит виду; наличие вида в точке не гарантировано</span>
       <span>⭕ круг = радиус неточности координаты</span>
+    </div>
+    <div class="map-tools">
+      <div class="model-box">
+        <b>Модель Вермланда 12,5 м</b><br>
+        SLU Skogskarta: сосна, ель, берёза, дуб, бук и средний диаметр; SLU Markfuktighet: 3 класса влажности.
+        <br><button id="habitatFocus" type="button">Показать Vålberg–Karlstad</button>
+        <button id="habitatToggle" class="on" type="button">Слой пригодности включён</button>
+      </div>
+      <div class="model-box">
+        <b>Что означает число</b><br>
+        Это относительная пригодность биотопа 0–100, а не шанс найти гриб и не прогноз урожая. Погода, сезон, почва, история леса и свежие вырубки требуют отдельной проверки.
+      </div>
     </div>
     <div class="note" id="mapNote"></div>
   </div>
@@ -893,6 +917,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/torrakberget.html">Länsstyrelsen Värmland — Torrakberget</a> ·
       <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/svartan.html">Länsstyrelsen Värmland — Svartån</a> ·
       <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/abengtshojden.html">Länsstyrelsen Värmland — Åbengtshöjden</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/raglandaberget.html">Länsstyrelsen Värmland — Råglandaberget</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/nedre-prostgardsalven.html">Länsstyrelsen Värmland — Nedre Prostgårdsälven</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/lampenshalan.html">Länsstyrelsen Värmland — Lämpenshålan</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/kittelfaltet.html">Länsstyrelsen Värmland — Kittelfältet</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/brattforsheden.html">Länsstyrelsen Värmland — Brattforsheden</a> ·
+      <a href="https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/skogsstyrelsens-geodata/">Skogsstyrelsen — описания геоданных</a> ·
+      <a href="https://www.skogsstyrelsen.se/e-tjanster-och-kartor/karttjanster/geodatatjanster/ladda-ner-geodata/">Skogsstyrelsen — загрузка открытых геоданных</a> ·
       <a href="https://www.naturvardsverket.se/amnesomraden/allemansratten/">Allemansrätten</a>
     </div>
   </footer>
@@ -943,6 +974,10 @@ const SPECIES = {
       {lat:59.833,lng:13.533,loc:'Hästskoholmen (в черте г. Munkfors)',prov:'Вермланд (Munkfors)',ref:true,forest:'Берег реки, парковая зона, лиственный лес и сосновая вересковая пустошь вперемешку — прямо в городе.'},
       {lat:59.387,lng:13.407,loc:'Sörmon (западный въезд в Карлстад по E18)',prov:'Вермланд (Карлстад)',ref:true,forest:'Огромная озовая гряда: дюны, песчаные террасы, сосновый лес на песке (hedtallskog) — классический тальхед.'},
       {lat:59.443,lng:13.379,loc:'Högemon (≈10 км СЗ Карлстада, 4 км З Skåre)',prov:'Вермланд (Карлстад)',ref:true,forest:'Песчаный холм 105 м с вересковым сосновым лесом (hedtallskog), ледниковые гряды.'},
+      {lat:59.65201,lng:13.71314,loc:'Råglandaberget naturreservat (≈5 км С Molkom)',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/raglandaberget.html',forest:'Богатая смешанная лиственная лесная система на основной гиперитовой породе: лещина, липа, клён, вяз и ясень; на вершине старый сосняк. Для обыкновенной лисички наиболее интересны смешанные участки и границы хвойного леса.'},
+      {lat:59.60845,lng:13.76165,loc:'Nedre Prostgårdsälven naturreservat (≈2,5 км В Molkom)',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/nedre-prostgardsalven.html',forest:'Влажный овражный смешанный лес на глинистой почве, с крупными деревьями, высокой долей лиственных пород и мёртвой древесины. Подходит для поиска в более сухих мшистых частях оврага, не у самой воды.'},
+      {lat:59.52282,lng:13.95391,loc:'Lämpenshålan naturreservat',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/lampenshalan.html',forest:'Сухой tallhed: редкий высокий сосняк на песчаной гряде, мхи, лишайники, черника и брусника. Для лисички это возможный, но менее надёжный биотоп, чем влажный ельник или смешанный лес.'},
+      {lat:59.65116,lng:13.94458,loc:'Kittelfältets naturreservat / Brattforsheden',prov:'Filipstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/kittelfaltet.html',forest:'Песчаные гряды и старый сосновый лес, местами мох и черничник; большой природный комплекс Brattforsheden включает также влажные ложбины и овраги. Проверяй микробиотоп на месте.'},
       {lat:59.66,lng:14.30,loc:'Åbengtshöjden (СВ Saxåhyttan, координаты приблизительные)',prov:'Вермланд (Filipstad)',ref:true,forest:'Нетронутый с 1950-х старый лес и болота, высокая влажность почвы и воздуха.'}
     ]
   },
@@ -975,6 +1010,8 @@ const SPECIES = {
       {lat:59.833,lng:13.533,loc:'Hästskoholmen (в черте г. Munkfors)',prov:'Вермланд (Munkfors)',ref:true,forest:'Берег реки, лиственный лес и сосновая пустошь — трубковидная лисичка любит такие сырые прибрежные участки.'},
       {lat:59.387,lng:13.407,loc:'Sörmon (западный въезд в Карлстад по E18)',prov:'Вермланд (Карлстад)',ref:true,forest:'Озовая гряда с сосновым лесом на песке (hedtallskog) — классический тальхед.'},
       {lat:59.443,lng:13.379,loc:'Högemon (≈10 км СЗ Карлстада)',prov:'Вермланд (Карлстад)',ref:true,forest:'Песчаный холм с вересковым сосновым лесом (hedtallskog).'},
+      {lat:59.60845,lng:13.76165,loc:'Nedre Prostgårdsälven naturreservat (≈2,5 км В Molkom)',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/nedre-prostgardsalven.html',forest:'Влажный овражный смешанный лес на глинистой почве, с крупными деревьями и высокой долей лиственных пород. Для трубковидной лисички интересны мшистые участки с елью выше зоны регулярного затопления.'},
+      {lat:59.65116,lng:13.94458,loc:'Kittelfältets naturreservat / Brattforsheden',prov:'Filipstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/kittelfaltet.html',forest:'В большом комплексе Brattforsheden сухие песчаные сосняки чередуются с озёрами, болотами и оврагами. Искать следует не на сухой лишайниковой гряде, а во влажных мшистых хвойных понижениях.'},
       {lat:59.66,lng:14.30,loc:'Åbengtshöjden (СВ Saxåhyttan, координаты приблизительные)',prov:'Вермланд (Filipstad)',ref:true,forest:'Нетронутый с 1950-х старый лес и болота, влажный микроклимат — почти не тронут лесозаготовкой.'}
     ]
   },
@@ -1006,6 +1043,8 @@ const SPECIES = {
       {lat:59.415,lng:13.896,loc:'Ölmans lövskogsraviner (≈5 км СВ Väse)',prov:'Вермланд (Karlstad)',ref:true,forest:'Овражный лес вдоль реки Ölman: серая ольха, осина, берёза, ива; постоянно влажный, регулярно затапливается.'},
       {lat:59.65,lng:14.00,loc:'Lungälvsravinerna (у Brattfors, ≈10 км ЮЗ Filipstad)',prov:'Вермланд (Filipstad)',ref:true,forest:'Один из лучших сохранившихся овражных ландшафтов Вермланда — эрозия в песчаных отложениях, богатая флора, редкие лишайники и грибы.'},
       {lat:59.65,lng:13.55,loc:'Torsberget (зап. берег оз. Västra Örten)',prov:'Вермланд (Forshaga)',ref:true,forest:'Известковый (гиперитовый) еловый лес с орешником (лещиной) и липой — редкая для ели известковая подложка, отличный биотоп чёрной лисички.'},
+      {lat:59.65201,lng:13.71314,loc:'Råglandaberget naturreservat (≈5 км С Molkom)',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/raglandaberget.html',forest:'Очень сильный кандидатный биотоп: основная гиперитовая порода и богатый смешанный лиственный лес с лещиной, липой, клёном, вязом и ясенем. Наличие вида не подтверждается одной только экологией.'},
+      {lat:59.60845,lng:13.76165,loc:'Nedre Prostgårdsälven naturreservat (≈2,5 км В Molkom)',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/nedre-prostgardsalven.html',forest:'Влажный овражный смешанный лес на глинистой почве с высокой долей лиственных пород — подходящее сочетание для поиска чёрной лисички на склонах выше русла.'},
       {lat:59.808,lng:13.979,loc:'Svartån (между Bosjön и Grässjön, ≈15 км СЗ Filipstad)',prov:'Вермланд (Filipstad/Hagfors)',ref:true,forest:'Еловый овражный лес (Skäftdalen — крупнейший овраг), рядом сухой песчаный сосняк и пастбищный ельник.'}
     ]
   },
@@ -1034,7 +1073,10 @@ const SPECIES = {
       {lat:59.569,lng:13.200,loc:'Storhöjden (≈4 км С Fagerås)',prov:'Вермланд (Kil)',ref:true,forest:'Сосновый лес на гребне горы с лиственными вкраплениями на склонах, скалы и осыпи.'},
       {lat:59.348,lng:14.033,loc:'Stora Vilången (≈6 км СЗ Кристинехамн, координаты приблизительные)',prov:'Вермланд (Storfors/Kristinehamn)',ref:true,forest:'Многовековые толстые сосны у берега олиготрофного озера и на островах, много сухостоя.'},
       {lat:59.457,lng:14.117,loc:'Stor-Älgsjön (≈12 км ЮЗ Storfors)',prov:'Вермланд (Storfors)',ref:true,forest:'Старый сосняк вокруг озера на тонкой почве, на вершинах — ельник с богатым бородатым лишайником (Usnea).'},
-      {lat:59.63,lng:13.60,loc:'Torrakberget (юж. берег оз. Västra Örten)',prov:'Вермланд (Карлстад)',ref:true,forest:'Крупнейший цельный естественный лес коммуны Карлстад: сосны до 350 лет на вершине, ниже смешанный хвойный лес.'}
+      {lat:59.63,lng:13.60,loc:'Torrakberget (юж. берег оз. Västra Örten)',prov:'Вермланд (Карлстад)',ref:true,forest:'Крупнейший цельный естественный лес коммуны Карлстад: сосны до 350 лет на вершине, ниже смешанный хвойный лес.'},
+      {lat:59.65201,lng:13.71314,loc:'Råglandaberget naturreservat (≈5 км С Molkom)',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/raglandaberget.html',forest:'Старый сосняк на вершине и богатый смешанный лес на склонах. Для королевского мухомора релевантны хвойные части; наличие вида в резервате не подтверждается описанием леса.'},
+      {lat:59.52282,lng:13.95391,loc:'Lämpenshålan naturreservat',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/lampenshalan.html',forest:'Сухой сосновый tallhed на песчаной гряде с мхами, лишайниками, черникой и брусникой — возможный хвойный биотоп вида.'},
+      {lat:59.65116,lng:13.94458,loc:'Kittelfältets naturreservat / Brattforsheden',prov:'Filipstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/kittelfaltet.html',forest:'Старые сосновые участки на песчаных ледниковых формах, рядом влажные хвойные понижения. Вид следует искать только для опознавания: он ядовит.'}
     ]
   },
   matsutake:{
@@ -1056,7 +1098,9 @@ const SPECIES = {
       {lat:59.2562,lng:17.9219,loc:'Gömmarens naturreservat',prov:'Стокгольм (Худдинге)',ref:true,forest:'Старый сосновый лес на скалистых холмах — известны находки голиатмусерона недалеко от Стокгольма.'},
       {lat:64.212,lng:20.355,loc:'Krokåns naturreservat (≈6 км ЮВ Botsmark)',prov:'Västerbotten (Умео)',ref:true,forest:'Обожжённый пожаром песчаный сосняк (brandpräglad sandtallskog), тонкий почвенный покров — подтверждённое место находок голиатмусерона (Länsstyrelsen Västerbotten).'},
       {lat:63.767,lng:19.618,loc:'Örsbäcks naturreservat (у дороги 512, близ Gräsmyr)',prov:'Västerbotten (Нордмалинг)',ref:true,forest:'Старый сосняк на песчаной гряде (sandtallskog) — заповедник прямо называет голиатмусерон одним из видов, ради которых он создан.'},
-      {lat:63.933,lng:16.350,loc:'Nabbens naturreservat (≈ у Rossön)',prov:'Емтланд (Стрёмсунд)',ref:true,forest:'Природный сосновый лес со старыми соснами до 30 м, следы пожаров — подтверждённые находки голиатмусерона.'}
+      {lat:63.933,lng:16.350,loc:'Nabbens naturreservat (≈ у Rossön)',prov:'Емтланд (Стрёмсунд)',ref:true,forest:'Природный сосновый лес со старыми соснами до 30 м, следы пожаров — подтверждённые находки голиатмусерона.'},
+      {lat:59.52282,lng:13.95391,loc:'Lämpenshålan naturreservat',prov:'Karlstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/lampenshalan.html',forest:'Экологически подходящий южный тип: сухой сосновый tallhed на песчаной гряде с мохово-лишайниковым покровом. Это кандидат для обследования, а не подтверждённая находка мацутаке.'},
+      {lat:59.65116,lng:13.94458,loc:'Kittelfältets naturreservat / Brattforsheden',prov:'Filipstads kommun, Värmlands län',ref:true,source:'https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/kittelfaltet.html',forest:'Старый сосновый лес на песчаных грядах Brattforsheden — подходящая структура для обследования мацутаке. Участки переживали природоохранные палы, поэтому наличие непрерывной грибницы нельзя предполагать без наблюдения.'}
     ]
   }
 };
@@ -1066,17 +1110,103 @@ let current='cib', chart=null;
 
 // ============ КАРТА ============
 const map=L.map('map',{scrollWheelZoom:false}).setView([62.5,16.5],4);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:13}).addTo(map);
+map.createPane('habitatPane');
+map.getPane('habitatPane').style.zIndex=320;
+map.createPane('officialForestPane');
+map.getPane('officialForestPane').style.zIndex=340;
+map.createPane('observationsPane');
+map.getPane('observationsPane').style.zIndex=360;
+const forestBase=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'&copy; OpenStreetMap contributors',
+  maxZoom:19
+}).addTo(map);
+const lightBase=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; OpenStreetMap &copy; CARTO',
+  maxZoom:19
+});
+const SKS_WMS='https://geodpags.skogsstyrelsen.se/arcgis/services/Geodataportal/';
+function sksWms(service,layer,opacity){
+  return L.tileLayer.wms(SKS_WMS+service+'/MapServer/WMSServer',{
+    layers:layer,format:'image/png',transparent:true,opacity:opacity,
+    pane:'officialForestPane',attribution:'Skogsstyrelsen'
+  });
+}
+const officialLayers={
+  'Skogsstyrelsen · заболоченный лес':sksWms('GeodataportalVisaSumpskog','Sumpskog_Skogsstyrelsen',.55),
+  'Skogsstyrelsen · ключевые биотопы':sksWms('GeodataportalVisaNyckelbiotop','Nyckelbiotop_Skogsstyrelsen',.65),
+  'Skogsstyrelsen · заявки на рубку':sksWms('GeodataportalVisaAvverkningsanmalan','Avverkningsanmalan_Skogsstyrelsen',.55),
+  'Skogsstyrelsen · выполненные рубки':sksWms('GeodataportalVisaUtfordavverkning','UtfordAvverkning_Skogsstyrelsen',.60)
+};
+L.control.layers({
+  '🌲 Леса и дороги (OSM)':forestBase,
+  'Светлая карта':lightBase
+},officialLayers,{position:'topright',collapsed:true}).addTo(map);
 map.fitBounds([[55.2,11.0],[69.0,24.5]]);
 let densityLayer=null, pinLayer=L.layerGroup().addTo(map);
+const HABITAT_BOUNDS=L.latLngBounds([[59.25,12.70],[59.52,14.25]]);
+const HABITAT_SIZE={width:1800,height:720};
+let habitatLayer=null, habitatEnabled=true;
+const scoreImages={};
 
 function densityUrl(taxon){
   return 'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?taxonKey='+taxon+'&country=SE&bin=hex&hexPerTile=30&style=classic-noborder.poly';
 }
+function updateHabitatLayer(){
+  if(habitatLayer) map.removeLayer(habitatLayer);
+  habitatLayer=L.imageOverlay('assets/habitat/'+current+'-overlay.png',HABITAT_BOUNDS,{
+    pane:'habitatPane',opacity:.78,interactive:false,
+    attribution:'SLU Skogskarta & SLU Markfuktighet / Skogsstyrelsen'
+  });
+  if(habitatEnabled) habitatLayer.addTo(map);
+}
+function loadScoreImage(species){
+  if(scoreImages[species]) return scoreImages[species];
+  scoreImages[species]=new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=HABITAT_SIZE.width;canvas.height=HABITAT_SIZE.height;
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(img,0,0);
+      resolve(ctx);
+    };
+    img.onerror=reject;
+    img.src='assets/habitat/'+species+'-score.png';
+  });
+  return scoreImages[species];
+}
+function scoreLabel(score){
+  if(score<20) return 'лес по модели не распознан или пригодность очень низкая';
+  if(score<40) return 'низкая';
+  if(score<60) return 'умеренная';
+  if(score<80) return 'хорошая';
+  return 'высокая';
+}
+map.on('click',async e=>{
+  if(!HABITAT_BOUNDS.contains(e.latlng)) return;
+  const west=HABITAT_BOUNDS.getWest(),east=HABITAT_BOUNDS.getEast();
+  const south=HABITAT_BOUNDS.getSouth(),north=HABITAT_BOUNDS.getNorth();
+  const x=Math.min(HABITAT_SIZE.width-1,Math.max(0,Math.floor((e.latlng.lng-west)/(east-west)*HABITAT_SIZE.width)));
+  const y=Math.min(HABITAT_SIZE.height-1,Math.max(0,Math.floor((north-e.latlng.lat)/(north-south)*HABITAT_SIZE.height)));
+  try{
+    const ctx=await loadScoreImage(current);
+    const score=Math.round(ctx.getImageData(x,y,1,1).data[0]/255*100);
+    const coord=e.latlng.lat.toFixed(5)+', '+e.latlng.lng.toFixed(5);
+    L.popup().setLatLng(e.latlng).setContent(
+      '<div class="score-pop"><b>'+SPECIES[current].ru+'</b><br>'+
+      '<span class="score">'+score+' / 100</span> · '+scoreLabel(score)+'<br>'+
+      '<span class="coords">'+coord+'</span><br>'+
+      '<small>Пригодность лесного биотопа, не вероятность находки. Проверь слои вырубок и реальный лес на месте.</small></div>'
+    ).openOn(map);
+  }catch(err){
+    L.popup().setLatLng(e.latlng).setContent('Не удалось прочитать локальный слой оценки. Запусти страницу через локальный веб-сервер.').openOn(map);
+  }
+});
 function drawMap(){
   const s=SPECIES[current];
+  updateHabitatLayer();
   if(densityLayer) map.removeLayer(densityLayer);
-  densityLayer=L.tileLayer(densityUrl(s.taxon),{opacity:.72,maxZoom:13}).addTo(map);
+  densityLayer=L.tileLayer(densityUrl(s.taxon),{opacity:.72,maxZoom:13,pane:'observationsPane'}).addTo(map);
   pinLayer.clearLayers();
   const pinIcon=L.divIcon({html:'<div style="font-size:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))">📍</div>',className:'',iconSize:[22,22],iconAnchor:[11,21],popupAnchor:[0,-18]});
   const refIcon=L.divIcon({html:'<div style="font-size:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))">🌲</div>',className:'',iconSize:[22,22],iconAnchor:[11,21],popupAnchor:[0,-18]});
@@ -1090,14 +1220,23 @@ function drawMap(){
     const whenLine=p.ref?('<span style="color:#666">'+p.prov+'</span> · <span style="color:#2f7a3d;font-weight:600">кандидатный биотоп, не находка</span>'):('<span style="color:#666">'+p.prov+' · '+p.date+'</span>');
     const forestText=p.ref?p.forest:'Тип леса не подтверждён использованной записью GBIF; проверяйте участок на месте.';
     const forestLine='<br><span style="color:#4a5a3a">🌳 '+forestText+'</span>';
+    const sourceLine=p.source?('<br><a href="'+p.source+'" target="_blank" rel="noopener">Официальное описание территории ↗</a>'):'';
     L.marker([p.lat,p.lng],{icon:p.ref?refIcon:pinIcon}).bindPopup(
-      '<b>'+p.loc+'</b><br>'+whenLine+forestLine+'<br>'+
+      '<b>'+p.loc+'</b><br>'+whenLine+forestLine+sourceLine+'<br>'+
       '<span style="font-family:monospace;font-weight:700">'+coord+'</span> <span style="color:#888">±'+(p.u!=null?p.u+' м':'—')+'</span> '+
       '<button class="copybtn" onclick="copyText(\''+coord+'\',this)">⧉ Копировать</button><br>'+
       '<a href="'+g+'" target="_blank">Google Maps</a> · <a href="'+a+'" target="_blank">Apple Maps</a>'
     ).addTo(pinLayer);
   });
 }
+
+document.getElementById('habitatToggle').addEventListener('click',e=>{
+  habitatEnabled=!habitatEnabled;
+  if(habitatEnabled) habitatLayer.addTo(map); else map.removeLayer(habitatLayer);
+  e.currentTarget.classList.toggle('on',habitatEnabled);
+  e.currentTarget.textContent=habitatEnabled?'Слой пригодности включён':'Слой пригодности выключен';
+});
+document.getElementById('habitatFocus').addEventListener('click',()=>map.fitBounds(HABITAT_BOUNDS,{padding:[12,12]}));
 
 // ============ ГРАФИК СЕЗОНА ============
 function drawChart(){
@@ -1135,12 +1274,13 @@ function drawCoords(){
     const uCls=(p.u!=null&&p.u>2000)?'u-badge u-hi':'u-badge';
     const uTxt=(p.u!=null)?('±'+(p.u>=1000?(p.u/1000)+' км':p.u+' м')):'—';
     const whenTxt=p.ref?'<span style="color:#2f7a3d;font-weight:600">🌲 кандидатный биотоп</span>':'📍 наблюдение '+p.date;
+    const sourceTxt=p.source?'<br><a href="'+p.source+'" target="_blank" rel="noopener">Источник ↗</a>':'';
     const forestText=p.ref?(p.forest||'Описание леса не добавлено'):'Тип леса не подтверждён использованной записью GBIF; проверяйте участок на месте.';
     h+='<tr>'+
        '<td><span class="mono">'+coord+'</span> <button class="copybtn" data-c="'+coord+'">⧉ Копировать</button></td>'+
        '<td><span class="'+uCls+'">'+uTxt+'</span></td>'+
        '<td>'+p.loc+'<br><span style="color:#8a8f7e;font-size:.82rem">'+p.prov+'</span></td>'+
-       '<td style="max-width:220px">'+forestText+'</td>'+
+       '<td style="max-width:220px">'+forestText+sourceTxt+'</td>'+
        '<td style="white-space:nowrap">'+whenTxt+'</td>'+
        '<td><a class="maplink" href="'+g+'" target="_blank">Google</a><a class="maplink" href="'+a+'" target="_blank">Apple</a></td>'+
        '</tr>';
