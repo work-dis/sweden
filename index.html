@@ -780,6 +780,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="legend">
       <span><span class="sw-hex"></span><b>Плотность</b> находок (GBIF)</span>
       <span>📍 <b>Свежая находка</b> (см. список ниже)</span>
+      <span>🌲 <b>Известный биотоп</b> — заповедник/лес с подходящим типом деревьев, где вид уже отмечался</span>
       <span>⭕ круг = радиус неточности координаты</span>
     </div>
     <div class="note" id="mapNote"></div>
@@ -802,7 +803,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   <div class="card"><div id="coordList"></div></div>
 
   <footer>
-    <b>Как это читать (честно про «прогноз»).</b> Грибница многолетняя и почти не «переезжает» — она плодоносит из года в год на тех же местах, медленно расширяясь. Поэтому лучший прогноз «где будет в этом сезоне» = где находили раньше + правильный биотоп + подходящие сроки + влага. Тепловой слой и точки показывают исторические места; идти стоит через 1–3 недели после дождя, в сезонное окно вида. Числа отражают и обилие гриба, и активность наблюдателей (на юге и в Мэлардалене репортят чаще).
+    <b>Как это читать (честно про «прогноз»).</b> Грибница многолетняя и почти не «переезжает» — она плодоносит из года в год на тех же местах, медленно расширяясь. Поэтому лучший прогноз «где будет в этом сезоне» = где находили раньше + правильный биотоп + подходящие сроки + влага. Тепловой слой и 📍-точки показывают реальные находки Artportalen; 🌲-точки — конкретные заповедники и леса с описанным типом деревьев/почвы, подходящим под биологию вида (по данным Länsstyrelsen и др. источников) — туда стоит ехать целенаправленно. Идти стоит через 1–3 недели после дождя, в сезонное окно вида. Числа отражают и обилие гриба, и активность наблюдателей (на юге и в Мэлардалене репортят чаще).
     <br><br>
     <b>Правовое и безопасность.</b> Allemansrätten разрешает собирать съедобные грибы для себя почти везде, кроме участков у домов и охраняемых зон с ограничениями (смотри аншлаги). <b>Мухомор королевский ядовит</b> — только для опознавания. <b>Мацутаке (голиатмусерон) — краснокнижный (VU)</b>: собирай бережно, срезай зрелые, не разрушай грибницу, вноси находки в Artportalen.
     <br><br>
@@ -813,6 +814,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <a href="https://sv.wikipedia.org/wiki/Goliatmusseron">Goliatmusseron</a> ·
       <a href="https://artfakta.se/taxa/6276">Artfakta — goliatmusseron</a> ·
       <a href="https://svampindex.se/artiklar/kantareller/">Svampindex — kantareller</a> ·
+      <a href="https://www.lansstyrelsen.se/skane/besoksmal/nationalparker/dalby-soderskog-nationalpark.html">Länsstyrelsen Skåne — Dalby Söderskog</a> ·
+      <a href="https://www.lansstyrelsen.se/skane/besoksmal/naturreservat/lund/hackeberga-naturreservat.html">Länsstyrelsen Skåne — Häckeberga</a> ·
+      <a href="https://www.lansstyrelsen.se/vasterbotten/besoksmal/naturreservat/hedkammen.html">Länsstyrelsen Västerbotten — Hedkammen</a> ·
+      <a href="https://sv.wikipedia.org/wiki/G%C3%B6mmarens_naturreservat">Gömmarens naturreservat</a> ·
+      <a href="https://www.lansstyrelsen.se/vasterbotten/besoksmal/naturreservat/krokan.html">Länsstyrelsen Västerbotten — Krokån</a> ·
+      <a href="https://www.lansstyrelsen.se/vasterbotten/besoksmal/naturreservat/orsback.html">Länsstyrelsen Västerbotten — Örsbäck</a> ·
+      <a href="https://www.lansstyrelsen.se/jamtland/besoksmal/naturreservat/nabben.html">Länsstyrelsen Jämtland — Nabben</a> ·
+      <a href="https://www.lansstyrelsen.se/orebro/besoksmal/naturreservat/orberga.html">Länsstyrelsen Örebro — Örberga</a> ·
+      <a href="https://www.lansstyrelsen.se/stockholm/besoksmal/naturreservat/tullgarn.html">Länsstyrelsen Stockholm — Tullgarn</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/kilsravinerna.html">Länsstyrelsen Värmland — Kilsravinerna</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat-i-varmlands-lan/ravinerna-vid-apertin.html">Länsstyrelsen Värmland — Ravinerna vid Apertin</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/rennstadsnipan.html">Länsstyrelsen Värmland — Rennstadsnipan</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/klackskullen.html">Länsstyrelsen Värmland — Klackskullen</a> ·
+      <a href="https://www.lansstyrelsen.se/varmland/besoksmal/naturreservat/storhojden.html">Länsstyrelsen Värmland — Storhöjden</a> ·
       <a href="https://www.naturvardsverket.se/amnesomraden/allemansratten/">Allemansrätten</a>
     </div>
   </footer>
@@ -831,28 +846,30 @@ const SPECIES = {
     months:[0,0,0,0,0,465,2475,4558,5325,1837,508,165],
     regions:[['Västergötland',3262],['Södermanland',1692],['Uppland',1404],['Västmanland',1375],['Skåne',1250],['Småland',1244],['Östergötland',900],['Bohuslän',737],['Dalsland',534],['Värmland',455]],
     points:[
-      {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',date:'ориентир: старовозрастный лес'},
-      {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',date:'ориентир: хвойный массив'},
-      {lat:59.78,lng:17.68,loc:'Lunsen naturreservat',prov:'Уппсала',date:'ориентир: сосняк на песке'},
-      {lat:59.83,lng:17.55,loc:'Hågadalen–Nåsten',prov:'Уппсала',date:'ориентир: смешанный лес'},
-      {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',date:'ориентир: лес у озёр'},
-      {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',date:'ориентир: хвойный, скалы, озёра'},
-      {lat:58.02,lng:12.30,loc:'Risveden',prov:'сев-вост. Гётеборга',date:'ориентир: старый лес'},
-      {lat:58.12,lng:12.05,loc:'Svartedalens naturreservat',prov:'Бохуслен',date:'ориентир: хвойный, много озёр'},
-      {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',date:'ориентир: смешанный лес'},
-      {lat:59.42,lng:14.85,loc:'Kilsbergen',prov:'Эребру / Нэрке',date:'ориентир: лесной кряж'},
-      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',date:'ориентир: буковый лес'},
-      {lat:55.70,lng:13.35,loc:'Skrylle naturreservat',prov:'Сконе (Лунд/Далбю)',date:'ориентир: смешанный лес'},
-      {lat:55.53,lng:13.18,loc:'Torup (bokskog)',prov:'Сконе (юг Мальмё)',date:'ориентир: буковый лес'},
-      {lat:56.35,lng:12.90,loc:'Hallandsåsen',prov:'Сконе / Халланд',date:'ориентир: лесистые склоны'},
-      {lat:58.72,lng:14.60,loc:'Tiveden nationalpark',prov:'Эребру / В.Гёталанд',date:'ориентир: старый скалистый лес'},
-      {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',date:'ориентир: хвойная глушь'},
-      {lat:58.10,lng:14.05,loc:'Hökensås',prov:'Вестергётланд',date:'ориентир: сосняк на песке'},
-      {lat:57.85,lng:15.63,loc:'Norra Kvill nationalpark',prov:'Смоланд',date:'ориентир: старый хвойный лес'},
-      {lat:56.63,lng:14.70,loc:'Åsnens nationalpark',prov:'Смоланд',date:'ориентир: лес у озера'},
-      {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',date:'ориентир: сосновый лес'},
-      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',date:'ориентир: лес и пойма'},
-      {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',date:'ориентир: ельник'}
+      {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',ref:true,forest:'Старовозрастная тайга (gammelskog): ель, сосна, местами дуб — редкий для региона старый лес почти нетронутый рубками.'},
+      {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',ref:true,forest:'Сплошной хвойный массив: сосна и ель, мшистый подлесок.'},
+      {lat:59.78,lng:17.68,loc:'Lunsen naturreservat',prov:'Уппсала',ref:true,forest:'Классический tallhed — сосна на песчаной гряде, лишайниковый покров.'},
+      {lat:59.83,lng:17.55,loc:'Hågadalen–Nåsten',prov:'Уппсала',ref:true,forest:'Смешанный лес: сосна, ель, берёза, местами дуб на возвышенностях.'},
+      {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',ref:true,forest:'Смешанный/хвойный лес у озёр: ель, сосна, берёза.'},
+      {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',ref:true,forest:'Хвойный лес на скалах у озёр: сосна, ель.'},
+      {lat:58.02,lng:12.30,loc:'Risveden',prov:'сев-вост. Гётеборга',ref:true,forest:'Старый хвойный массив: ель, сосна.'},
+      {lat:58.12,lng:12.05,loc:'Svartedalens naturreservat',prov:'Бохуслен',ref:true,forest:'Хвойная глушь среди множества озёр: сосна, ель.'},
+      {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',ref:true,forest:'Смешанный лес у гряды Кильсберген: дуб, берёза, ель.'},
+      {lat:59.42,lng:14.85,loc:'Kilsbergen',prov:'Эребру / Нэрке',ref:true,forest:'Лесной кряж: ель, сосна, берёзовые опушки.'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',ref:true,forest:'Буковый лес (bokskog) в ущельях на известковой почве.'},
+      {lat:55.70,lng:13.35,loc:'Skrylle naturreservat',prov:'Сконе (Лунд/Далбю)',ref:true,forest:'Смешанный лес: бук, дуб, ель.'},
+      {lat:55.53,lng:13.18,loc:'Torup (bokskog)',prov:'Сконе (юг Мальмё)',ref:true,forest:'Буковый лес (bokskog) южнее Мальмё.'},
+      {lat:56.35,lng:12.90,loc:'Hallandsåsen',prov:'Сконе / Халланд',ref:true,forest:'Лесистые склоны гряды: бук, ель, смешанный лес.'},
+      {lat:58.72,lng:14.60,loc:'Tiveden nationalpark',prov:'Эребру / В.Гёталанд',ref:true,forest:'Старый скалистый хвойный лес: сосна, ель среди валунов.'},
+      {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',ref:true,forest:'Хвойная глушь: сосна, ель.'},
+      {lat:58.10,lng:14.05,loc:'Hökensås',prov:'Вестергётланд',ref:true,forest:'Сосняк на песчаной гряде (tallhed).'},
+      {lat:57.85,lng:15.63,loc:'Norra Kvill nationalpark',prov:'Смоланд',ref:true,forest:'Старый хвойный лес: сосна, ель, есть 350-летние сосны.'},
+      {lat:56.63,lng:14.70,loc:'Åsnens nationalpark',prov:'Смоланд',ref:true,forest:'Смешанный лес у озера: сосна, ель, дуб на островах.'},
+      {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',ref:true,forest:'Дикий сосновый лес у норвежской границы.'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',ref:true,forest:'Хвойный лес и пойма: ель, сосна, ольха у воды.'},
+      {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',ref:true,forest:'Крутой прибрежный ельник Высокого берега.'},
+      {lat:59.48,lng:13.32,loc:'Kilsravinerna (южная окраина г. Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Влажный овражный лиственный лес прямо у города; сбор грибов и ягод официально разрешён.'},
+      {lat:59.608,lng:13.104,loc:'Rennstadsnipan (≈17 км СЗ Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Сосна, осина, липа, лещина на скалистой горе; много сухостоя, следы старого пожара.'}
     ]
   },
   tr:{
@@ -864,16 +881,18 @@ const SPECIES = {
     months:[0,0,0,0,0,4,64,1154,4343,2996,914,245],
     regions:[['Västergötland',1736],['Södermanland',1333],['Västmanland',1014],['Uppland',965],['Skåne',702],['Småland',628],['Östergötland',432],['Dalsland',347],['Bohuslän',331],['Ångermanland',296]],
     points:[
-      {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',date:'ориентир: старовозрастный лес'},
-      {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',date:'ориентир: хвойный массив'},
-      {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',date:'ориентир: лес у озёр'},
-      {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',date:'ориентир: хвойный, скалы, озёра'},
-      {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',date:'ориентир: смешанный лес'},
-      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',date:'ориентир: буковый лес'},
-      {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',date:'ориентир: хвойная глушь'},
-      {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',date:'ориентир: сосновый лес'},
-      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',date:'ориентир: лес и пойма'},
-      {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',date:'ориентир: ельник'}
+      {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',ref:true,forest:'Влажный старовозрастный ельник у ручьёв.'},
+      {lat:59.14,lng:17.98,loc:'Hanvedens naturreservat',prov:'Стокгольм (юг)',ref:true,forest:'Мшистый хвойный массив: ель, сосна.'},
+      {lat:57.68,lng:12.08,loc:'Delsjöområdet',prov:'Гётеборг',ref:true,forest:'Смешанный лес у озёр: ель, берёза.'},
+      {lat:57.82,lng:12.10,loc:'Vättlefjäll naturreservat',prov:'Гётеборг (север)',ref:true,forest:'Хвойный лес на скалах у озёр: ель.'},
+      {lat:59.33,lng:14.90,loc:'Garphyttans nationalpark',prov:'Эребру / Нэрке',ref:true,forest:'Смешанный лес: ель, дуб, берёза.'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',ref:true,forest:'Влажный буково-еловый лес в ущельях.'},
+      {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',ref:true,forest:'Хвойная глушь: ель, сосна.'},
+      {lat:59.03,lng:11.87,loc:'Tresticklan nationalpark',prov:'Далсланд',ref:true,forest:'Влажные ложбины соснового леса.'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens np.',prov:'Даларна/Гестрикланд',ref:true,forest:'Хвойный лес и пойма: ель, ольха у воды.'},
+      {lat:63.09,lng:18.48,loc:'Skuleskogens np.',prov:'Онгерманланд (Höga Kusten)',ref:true,forest:'Влажный крутой прибрежный ельник.'},
+      {lat:59.48,lng:13.32,loc:'Kilsravinerna (южная окраина г. Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Влажный овражный лиственный лес прямо у города; поздняя трубковидная лисичка любит именно такие сырые ложбины.'},
+      {lat:59.608,lng:13.104,loc:'Rennstadsnipan (≈17 км СЗ Kil)',prov:'Вермланд (Kil)',ref:true,forest:'Сосна, осина, липа, лещина на скалистой горе; много сухостоя.'}
     ]
   },
   black:{
@@ -885,12 +904,18 @@ const SPECIES = {
     months:[3,1,2,1,2,1,34,597,1737,610,80,9],
     regions:[['Södermanland',529],['Uppland',517],['Skåne',419],['Småland',260],['Västmanland',211],['Västergötland',201],['Östergötland',114],['Värmland',100],['Närke',99],['Halland',77]],
     points:[
-      {lat:59.496509,lng:12.704351,u:4,loc:'Arvika',prov:'Värmland',date:'2025-07-31'},
-      {lat:61.19889,lng:16.1762,u:10,loc:'Svarttjärnsbäcken',prov:'Hälsingland',date:'2025-08-07'},
-      {lat:61.22871,lng:16.02683,u:10,loc:'Stavbergtjärnsbäcken',prov:'Hälsingland',date:'2025-08-07'},
-      {lat:59.412933,lng:12.5587,u:100,loc:'Arvika (Vik)',prov:'Värmland',date:'2025-08-16'},
-      {lat:59.69148,lng:15.29709,u:1500,loc:'Jättåkerskogen, Ramsberg',prov:'Västmanland',date:'2025-07-26'},
-      {lat:58.96912,lng:16.301861,u:25031,loc:'Katrineholm (обфусцировано наблюдателем)',prov:'Södermanland',date:'2025-08-04'}
+      {lat:59.496509,lng:12.704351,u:4,loc:'Arvika',prov:'Värmland',date:'2025-07-31',forest:'Смешанный лес у воды: ель, берёза, местами дуб и лещина.'},
+      {lat:61.19889,lng:16.1762,u:10,loc:'Svarttjärnsbäcken',prov:'Hälsingland',date:'2025-08-07',forest:'Влажный еловый лес у ручья, мшистый берег.'},
+      {lat:61.22871,lng:16.02683,u:10,loc:'Stavbergtjärnsbäcken',prov:'Hälsingland',date:'2025-08-07',forest:'Влажный еловый лес у ручья, мшистый берег.'},
+      {lat:59.412933,lng:12.5587,u:100,loc:'Arvika (Vik)',prov:'Värmland',date:'2025-08-16',forest:'Смешанный лес у воды: ель, берёза, местами дуб.'},
+      {lat:59.69148,lng:15.29709,u:1500,loc:'Jättåkerskogen, Ramsberg',prov:'Västmanland',date:'2025-07-26',forest:'Смешанный лес с дубом и лещиной на богатой почве Мэлардалена.'},
+      {lat:58.96912,lng:16.301861,u:25031,loc:'Katrineholm (обфусцировано наблюдателем)',prov:'Södermanland',date:'2025-08-04',forest:'Дубово-лещиновый подлесок в смешанном лесу, известковая почва.'},
+      {lat:56.05,lng:13.23,loc:'Söderåsens nationalpark',prov:'Сконе',ref:true,forest:'Классика вида: старый буковый лес (bokskog) в ущельях, известковая влажная почва.'},
+      {lat:55.6763,lng:13.3300,loc:'Dalby Söderskogs nationalpark',prov:'Сконе (Лунд)',ref:true,forest:'Самый маленький нацпарк Швеции — старый буковый лес на известковой почве.'},
+      {lat:55.5824,lng:13.4150,loc:'Häckeberga naturreservat',prov:'Сконе (Генарп)',ref:true,forest:'Глубокий буковый лес у озера Häckebergasjön.'},
+      {lat:58.985,lng:15.035,loc:'Örberga naturreservat (≈1.5 км ЮЗ Åsbro)',prov:'Närke (Askersund)',ref:true,forest:'Известковый хвойный лес (kalkbarrskog), лещиновая роща (hassellund), дубовый выгон (ekhage) и овраг у ручья — очень характерный биотоп вида.'},
+      {lat:58.95,lng:17.58,loc:'Tullgarns naturreservat (≈5 км В Vagnhärad)',prov:'Сёдерманланд/Стокгольмский лен',ref:true,forest:'Богатый широколиственный лес (ädellövskog) у замка Тульгарн — дубовые рощи, пастбища; реально репортили находки во влажных понижениях.'},
+      {lat:59.508,lng:13.353,loc:'Ravinerna vid Apertin (≈3 км ЮВ Stora Kils kyrka)',prov:'Вермланд (Kil)',ref:true,forest:'Овражный широколиственный лес: ясень, дуб, конский каштан, клён, липа в пологе, лещина и бузина в подлеске — почти учебниковый биотоп чёрной лисички, и совсем рядом с Kil.'}
     ]
   },
   regalis:{
@@ -902,12 +927,20 @@ const SPECIES = {
     months:[2,0,0,0,2,26,639,2059,1521,149,11,0],
     regions:[['Västergötland',1065],['Västmanland',663],['Södermanland',433],['Uppland',294],['Småland',216],['Dalarna',210],['Bohuslän',181],['Västerbotten',175],['Jämtland',158],['Värmland',155]],
     points:[
-      {lat:58.57513,lng:13.39433,u:10,loc:'Bestorp',prov:'Västergötland (Götene)',date:'2026-07-01'},
-      {lat:58.53259,lng:13.50125,u:10,loc:'P-ängen',prov:'Västergötland (Götene)',date:'2026-07-10'},
-      {lat:58.036367,lng:12.420922,u:124,loc:'Skepplandavägen, Alingsås',prov:'V. Götaland (Ale)',date:'2026-07-02'},
-      {lat:57.78151,lng:16.27251,u:100,loc:'Broholm, Hummelstad',prov:'Småland (Västervik)',date:'2026-06-24'},
-      {lat:58.07545,lng:16.34037,u:500,loc:'Fieberg',prov:'Småland (Västervik)',date:'2026-06-18'},
-      {lat:62.66267,lng:17.63357,u:125,loc:'Brunne',prov:'Ångermanland (Härnösand)',date:'2026-07-14'}
+      {lat:58.57513,lng:13.39433,u:10,loc:'Bestorp',prov:'Västergötland (Götene)',date:'2026-07-01',forest:'Еловый лес с берёзой, мшистый подлесок.'},
+      {lat:58.53259,lng:13.50125,u:10,loc:'P-ängen',prov:'Västergötland (Götene)',date:'2026-07-10',forest:'Еловый лес с берёзой, мшистый подлесок.'},
+      {lat:58.036367,lng:12.420922,u:124,loc:'Skepplandavägen, Alingsås',prov:'V. Götaland (Ale)',date:'2026-07-02',forest:'Смешанный хвойно-берёзовый лес.'},
+      {lat:57.78151,lng:16.27251,u:100,loc:'Broholm, Hummelstad',prov:'Småland (Västervik)',date:'2026-06-24',forest:'Еловый лес черничного типа.'},
+      {lat:58.07545,lng:16.34037,u:500,loc:'Fieberg',prov:'Småland (Västervik)',date:'2026-06-18',forest:'Еловый лес черничного типа.'},
+      {lat:62.66267,lng:17.63357,u:125,loc:'Brunne',prov:'Ångermanland (Härnösand)',date:'2026-07-14',forest:'Северный бореальный еловый лес с берёзой, мшистый.'},
+      {lat:59.18,lng:18.23,loc:'Tyresta nationalpark',prov:'Стокгольм',ref:true,forest:'Старовозрастный мшистый ельник с берёзой — типичный биотоп вида.'},
+      {lat:59.45,lng:12.75,loc:'Glaskogens naturreservat',prov:'Вермланд',ref:true,forest:'Хвойная глушь: ель, сосна, берёза по краям.'},
+      {lat:63.09,lng:18.48,loc:'Skuleskogens nationalpark',prov:'Онгерманланд (Höga Kusten)',ref:true,forest:'Бореальный прибрежный ельник с берёзой.'},
+      {lat:58.72,lng:14.60,loc:'Tiveden nationalpark',prov:'Эребру / В.Гёталанд',ref:true,forest:'Старый скалистый хвойный лес: ель, сосна, мох.'},
+      {lat:60.20,lng:16.78,loc:'Färnebofjärdens nationalpark',prov:'Даларна/Гестрикланд',ref:true,forest:'Пойменный еловый лес с ольхой и берёзой у воды.'},
+      {lat:61.57,lng:12.70,loc:'Fulufjällets nationalpark',prov:'Даларна',ref:true,forest:'Горный ельник со старейшими елями Швеции (в т.ч. «Старый Тьикко») — характерный высокогорный биотоп.'},
+      {lat:59.533,lng:13.111,loc:'Klackskullen (≈5 км З Fagerås)',prov:'Вермланд (Kil)',ref:true,forest:'Старая сосна (до 330 лет) на скалистых склонах, ниже — ель, берёза, осина; много лишайника на камнях.'},
+      {lat:59.569,lng:13.200,loc:'Storhöjden (≈4 км С Fagerås)',prov:'Вермланд (Kil)',ref:true,forest:'Сосновый лес на гребне горы с лиственными вкраплениями на склонах, скалы и осыпи.'}
     ]
   },
   matsutake:{
@@ -919,12 +952,17 @@ const SPECIES = {
     months:[30,0,0,0,11,1,8,2100,3113,214,7,1],
     regions:[['Lule lappmark',1127],['Västerbotten',1124],['Ångermanland',548],['Norrbotten',502],['Dalarna',409],['Härjedalen',320],['Lycksele lappmark',298],['Torne lappmark',284],['Jämtland',221],['Södermanland',185]],
     points:[
-      {lat:57.11076,lng:13.75348,u:150,loc:'Slättö sand (природный резерват)',prov:'Småland (Värnamo)',date:'2025-08-10'},
-      {lat:59.61886,lng:15.48098,u:10,loc:'Södra Gröningsmossen',prov:'Västmanland (Lindesberg)',date:'2025-08-15'},
-      {lat:59.23941,lng:17.53073,u:200,loc:'Malmsjön',prov:'Södermanland (Södertälje)',date:'2025-08-24'},
-      {lat:61.48494,lng:16.85937,u:213,loc:'Lindefallet (tallhed)',prov:'Hälsingland (Hudiksvall)',date:'2025-08-20'},
-      {lat:66.48744,lng:20.6559,u:10,loc:'Porsi, Norrimyrtjärnen',prov:'Lule lappmark (Jokkmokk)',date:'2025-08-30'},
-      {lat:67.87805,lng:20.98652,u:10,loc:'Esrange ravin',prov:'Torne lappmark (Kiruna)',date:'2025-08-31'}
+      {lat:57.11076,lng:13.75348,u:150,loc:'Slättö sand (природный резерват)',prov:'Småland (Värnamo)',date:'2025-08-10',forest:'Сухой сосняк на песке (tallhed), лишайниковый покров.'},
+      {lat:59.61886,lng:15.48098,u:10,loc:'Södra Gröningsmossen',prov:'Västmanland (Lindesberg)',date:'2025-08-15',forest:'Сосняк на песчаной гряде у болота.'},
+      {lat:59.23941,lng:17.53073,u:200,loc:'Malmsjön',prov:'Södermanland (Södertälje)',date:'2025-08-24',forest:'Сосновый лес на песчаной морене.'},
+      {lat:61.48494,lng:16.85937,u:213,loc:'Lindefallet (tallhed)',prov:'Hälsingland (Hudiksvall)',date:'2025-08-20',forest:'Классический tallhed — сосна на песке, лишайники.'},
+      {lat:66.48744,lng:20.6559,u:10,loc:'Porsi, Norrimyrtjärnen',prov:'Lule lappmark (Jokkmokk)',date:'2025-08-30',forest:'Северный сосняк на песке, лишайниковый бор.'},
+      {lat:67.87805,lng:20.98652,u:10,loc:'Esrange ravin',prov:'Torne lappmark (Kiruna)',date:'2025-08-31',forest:'Горный сосняк у обрыва, крайний северный ареал вида.'},
+      {lat:64.6027,lng:21.1670,loc:'Hedkammen naturreservat',prov:'Västerbotten (Скеллефтео, ~2 км ЮЗ Bureå)',ref:true,forest:'Светлые открытые песчаные сосновые тальхеды и озовая гряда — заповедник назван местом обитания голиатмусерона (по данным Länsstyrelsen Västerbotten).'},
+      {lat:59.2562,lng:17.9219,loc:'Gömmarens naturreservat',prov:'Стокгольм (Худдинге)',ref:true,forest:'Старый сосновый лес на скалистых холмах — известны находки голиатмусерона недалеко от Стокгольма.'},
+      {lat:64.212,lng:20.355,loc:'Krokåns naturreservat (≈6 км ЮВ Botsmark)',prov:'Västerbotten (Умео)',ref:true,forest:'Обожжённый пожаром песчаный сосняк (brandpräglad sandtallskog), тонкий почвенный покров — подтверждённое место находок голиатмусерона (Länsstyrelsen Västerbotten).'},
+      {lat:63.767,lng:19.618,loc:'Örsbäcks naturreservat (у дороги 512, близ Gräsmyr)',prov:'Västerbotten (Нордмалинг)',ref:true,forest:'Старый сосняк на песчаной гряде (sandtallskog) — заповедник прямо называет голиатмусерон одним из видов, ради которых он создан.'},
+      {lat:63.933,lng:16.350,loc:'Nabbens naturreservat (≈ у Rossön)',prov:'Емтланд (Стрёмсунд)',ref:true,forest:'Природный сосновый лес со старыми соснами до 30 м, следы пожаров — подтверждённые находки голиатмусерона.'}
     ]
   }
 };
@@ -947,6 +985,7 @@ function drawMap(){
   densityLayer=L.tileLayer(densityUrl(s.taxon),{opacity:.72,maxZoom:13}).addTo(map);
   pinLayer.clearLayers();
   const pinIcon=L.divIcon({html:'<div style="font-size:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))">📍</div>',className:'',iconSize:[22,22],iconAnchor:[11,21],popupAnchor:[0,-18]});
+  const refIcon=L.divIcon({html:'<div style="font-size:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))">🌲</div>',className:'',iconSize:[22,22],iconAnchor:[11,21],popupAnchor:[0,-18]});
   s.points.forEach(p=>{
     if(p.u && p.u>50){
       L.circle([p.lat,p.lng],{radius:p.u,color:s.color,weight:1,fillColor:s.color,fillOpacity:.08,dashArray:'3'}).addTo(pinLayer);
@@ -954,8 +993,10 @@ function drawMap(){
     const coord=p.lat.toFixed(5)+', '+p.lng.toFixed(5);
     const g='https://www.google.com/maps?q='+p.lat+','+p.lng;
     const a='https://maps.apple.com/?q='+p.lat+','+p.lng;
-    L.marker([p.lat,p.lng],{icon:pinIcon}).bindPopup(
-      '<b>'+p.loc+'</b><br><span style="color:#666">'+p.prov+' · '+p.date+'</span><br>'+
+    const whenLine=p.ref?('<span style="color:#666">'+p.prov+'</span> · <span style="color:#2f7a3d;font-weight:600">известный биотоп вида</span>'):('<span style="color:#666">'+p.prov+' · '+p.date+'</span>');
+    const forestLine=p.forest?('<br><span style="color:#4a5a3a">🌳 '+p.forest+'</span>'):'';
+    L.marker([p.lat,p.lng],{icon:p.ref?refIcon:pinIcon}).bindPopup(
+      '<b>'+p.loc+'</b><br>'+whenLine+forestLine+'<br>'+
       '<span style="font-family:monospace;font-weight:700">'+coord+'</span> <span style="color:#888">±'+(p.u!=null?p.u+' м':'—')+'</span> '+
       '<button class="copybtn" onclick="copyText(\''+coord+'\',this)">⧉ Копировать</button><br>'+
       '<a href="'+g+'" target="_blank">Google Maps</a> · <a href="'+a+'" target="_blank">Apple Maps</a>'
@@ -990,18 +1031,20 @@ function drawRegions(){
 // ============ СПИСОК КООРДИНАТ ============
 function drawCoords(){
   const s=SPECIES[current];
-  let h='<table class="coordtbl"><thead><tr><th>Координаты (шир., долг.)</th><th>±</th><th>Место / провинция</th><th>Дата</th><th>Навигатор</th></tr></thead><tbody>';
+  let h='<table class="coordtbl"><thead><tr><th>Координаты (шир., долг.)</th><th>±</th><th>Место / провинция</th><th>Тип леса / деревья</th><th>Когда</th><th>Навигатор</th></tr></thead><tbody>';
   s.points.forEach((p,i)=>{
     const coord=p.lat.toFixed(5)+', '+p.lng.toFixed(5);
     const g='https://www.google.com/maps?q='+p.lat+','+p.lng;
     const a='https://maps.apple.com/?q='+p.lat+','+p.lng;
     const uCls=(p.u!=null&&p.u>2000)?'u-badge u-hi':'u-badge';
     const uTxt=(p.u!=null)?('±'+(p.u>=1000?(p.u/1000)+' км':p.u+' м')):'—';
+    const whenTxt=p.ref?'<span style="color:#2f7a3d;font-weight:600">🌲 известный биотоп</span>':p.date;
     h+='<tr>'+
        '<td><span class="mono">'+coord+'</span> <button class="copybtn" data-c="'+coord+'">⧉ Копировать</button></td>'+
        '<td><span class="'+uCls+'">'+uTxt+'</span></td>'+
        '<td>'+p.loc+'<br><span style="color:#8a8f7e;font-size:.82rem">'+p.prov+'</span></td>'+
-       '<td style="white-space:nowrap">'+p.date+'</td>'+
+       '<td style="max-width:220px">'+(p.forest||'—')+'</td>'+
+       '<td style="white-space:nowrap">'+whenTxt+'</td>'+
        '<td><a class="maplink" href="'+g+'" target="_blank">Google</a><a class="maplink" href="'+a+'" target="_blank">Apple</a></td>'+
        '</tr>';
   });
@@ -1026,7 +1069,8 @@ function render(){
   document.getElementById('fcStatus').textContent=s.status;
   document.getElementById('fcHab').textContent=s.habitat;
   document.getElementById('fcWhere').textContent=s.where;
-  document.getElementById('mapNote').innerHTML='📍 Показаны '+s.points.length+' свежих находок. Пины — ориентир по месту; грибница держится годами, но иди в сезонное окно и через 1–3 недели после дождя.'+
+  const nRef=s.points.filter(p=>p.ref).length, nFind=s.points.length-nRef;
+  document.getElementById('mapNote').innerHTML='📍 '+nFind+' свежих находок (реальные записи Artportalen) и 🌲 '+nRef+' известных мест обитания — заповедники/леса с подходящим типом деревьев и почвы для этого вида. Пины — ориентир по месту; грибница держится годами, но иди в сезонное окно и через 1–3 недели после дождя.'+
     (s.cls==='poison'?' <b style="color:#9c2115">Вид ядовит — точки только для опознавания.</b>':'')+
     (s.cls==='redlist'?' <b style="color:#8a5a12">Вид краснокнижный — собирай бережно.</b>':'');
   drawMap(); drawChart(); drawRegions(); drawCoords();
