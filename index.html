@@ -843,7 +843,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   </div>
 
   <h2>Карта: лесной биотоп + наблюдения</h2>
-  <p class="lead">Нажми на участок: карта сохранит точку, покажет лес, грунт и погоду, позволит скопировать координаты или найти лучший расчётный участок в радиусе 3 км. В меню 🗺️ включаются NMD, природные ценности и свежие рубки.</p>
+  <p class="lead">Выбери вид и нажми на любой участок Швеции: карта оценит подходящий тип леса по породам NMD2023, покажет погоду и позволит найти лучший расчётный участок рядом. Грунт SGU пока детализирован только в Värmland.</p>
   <div class="card">
     <div id="map"></div>
     <div class="legend">
@@ -859,9 +859,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
     <div class="map-tools">
       <div class="model-box">
-        <b>Лесная маска SLU + пригодность вида</b><br>
-        Цвет показывается только внутри распознанного древостоя. Граница может отличаться от OSM: для проверки включён официальный покров NMD 2023.
-        <br><button id="habitatFocus" type="button">Показать Vålberg–Karlstad</button>
+        <b>Подходящие типы леса · вся Швеция</b><br>
+        Национальный слой построен по классам NMD2023: сосновый, еловый, смешанный хвойный и лиственный лес — отдельно на сухом и влажном грунте. Цвет есть только на распознанной лесной территории.
+        <br><button id="habitatFocus" type="button">Показать всю Швецию</button>
         <button id="habitatToggle" class="on" type="button">Слой пригодности включён</button>
         <label for="habitatThreshold"><br>Показывать оценку от</label>
         <select id="habitatThreshold">
@@ -872,7 +872,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       </div>
       <div class="model-box">
         <b>Что означает число</b><br>
-        Отдельно показаны постоянная пригодность биотопа и текущие условия по осадкам и температуре. Это ориентир для выбора места, не обещание урожая.
+        Оценка 0–100 показывает совместимость пород деревьев с выбранным видом. Влажность, грунт, возраст леса, рубки и погода проверяются отдельно; это ориентир, не вероятность находки.
+        <br><button id="densityToggle" type="button">Наблюдения GBIF выключены</button>
       </div>
     </div>
     <div class="selected-place" id="selectedPlace">
@@ -890,7 +891,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <a id="selectedApple" target="_blank" rel="noopener">Apple Maps</a>
       </div>
       <div class="selected-grid">
-        <div class="selected-metric"><span>Биотоп</span><b id="selectedHabitat">—</b></div>
+        <div class="selected-metric"><span>Лес по породам</span><b id="selectedHabitat">—</b></div>
         <div class="selected-metric"><span>Грунт SGU</span><b id="selectedSoil">—</b></div>
         <div class="selected-metric"><span>Рельеф</span><b id="selectedElevation" class="weather-loading">загрузка…</b></div>
         <div class="selected-metric"><span>Дожди 14 дней</span><b id="selectedRain" class="weather-loading">загрузка…</b></div>
@@ -1182,8 +1183,10 @@ const lightBase=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}
   maxZoom:19
 });
 const SKS_WMS='https://geodpags.skogsstyrelsen.se/arcgis/services/Geodataportal/';
-const HABITAT_BOUNDS=L.latLngBounds([[59.25,12.70],[59.52,14.25]]);
-const HABITAT_SIZE={width:1800,height:720};
+const HABITAT_BOUNDS=L.latLngBounds([[55.15,10.40],[69.20,24.30]]);
+const HABITAT_SIZE={width:2200,height:6000};
+const SOIL_BOUNDS=L.latLngBounds([[59.25,12.70],[59.52,14.25]]);
+const SOIL_SIZE={width:1800,height:720};
 function sksWms(service,layer,opacity){
   return L.tileLayer.wms(SKS_WMS+service+'/MapServer/WMSServer',{
     layers:layer,format:'image/png',transparent:true,opacity:opacity,
@@ -1191,11 +1194,11 @@ function sksWms(service,layer,opacity){
   });
 }
 const nmdForest=L.tileLayer.wms('https://geodata.naturvardsverket.se/inspire/lc-nmd/ows?',{
-  layers:'LC.LandCoverRaster.Bas_2.0',format:'image/png',transparent:true,opacity:.42,
+  layers:'LC.LandCoverRaster.Bas_0.2',format:'image/png',transparent:true,opacity:.42,
   pane:'forestReferencePane',attribution:'NMD / Naturvårdsverket'
-}).addTo(map);
+});
 const officialLayers={
-  'SGU · тип грунта':L.imageOverlay('assets/habitat/soil-overlay.png',HABITAT_BOUNDS,{
+  'SGU · тип грунта (Värmland)':L.imageOverlay('assets/habitat/soil-overlay.png',SOIL_BOUNDS,{
     pane:'officialForestPane',opacity:.66,attribution:'SGU Jordarter'
   }),
   'NMD 2023 · покров и тип леса':nmdForest,
@@ -1211,46 +1214,28 @@ L.control.layers({
   'Светлая карта':lightBase
 },officialLayers,{position:'topright',collapsed:true}).addTo(map);
 map.fitBounds([[55.2,11.0],[69.0,24.5]]);
-let densityLayer=null, pinLayer=L.layerGroup().addTo(map), selectedLayer=L.layerGroup().addTo(map);
-let habitatLayer=null, habitatEnabled=true, habitatThreshold=40, habitatRenderRequest=0;
-const scoreImages={};
+let densityLayer=null, densityEnabled=false, pinLayer=L.layerGroup().addTo(map), selectedLayer=L.layerGroup().addTo(map);
+let habitatLayer=null, habitatEnabled=true, habitatThreshold=40;
+let scoreImageCache={species:null,promise:null};
+const auxiliaryImages={};
 let selectedPoint=null, selectionRequest=0;
 const weatherCache={};
 
 function densityUrl(taxon){
   return 'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?taxonKey='+taxon+'&country=SE&bin=hex&hexPerTile=30&style=classic-noborder.poly';
 }
-function habitatColour(score){
-  if(score>=75) return [24,85,50,225];
-  if(score>=60) return [72,132,79,190];
-  return [235,190,58,150];
-}
-async function updateHabitatLayer(){
-  const request=++habitatRenderRequest;
+function updateHabitatLayer(){
   if(habitatLayer) map.removeLayer(habitatLayer);
   if(!habitatEnabled) return;
-  const ctx=await loadScoreImage(current);
-  if(request!==habitatRenderRequest) return;
-  const source=ctx.getImageData(0,0,HABITAT_SIZE.width,HABITAT_SIZE.height).data;
-  const canvas=document.createElement('canvas');
-  canvas.width=HABITAT_SIZE.width;canvas.height=HABITAT_SIZE.height;
-  const out=canvas.getContext('2d').createImageData(HABITAT_SIZE.width,HABITAT_SIZE.height);
-  for(let i=0;i<source.length;i+=4){
-    const score=source[i]/255*100;
-    if(score<habitatThreshold) continue;
-    const colour=habitatColour(score);
-    out.data[i]=colour[0];out.data[i+1]=colour[1];out.data[i+2]=colour[2];out.data[i+3]=colour[3];
-  }
-  canvas.getContext('2d').putImageData(out,0,0);
-  habitatLayer=L.imageOverlay(canvas.toDataURL('image/png'),HABITAT_BOUNDS,{
+  habitatLayer=L.imageOverlay('assets/habitat-sweden/'+current+'-overlay-'+habitatThreshold+'.png',HABITAT_BOUNDS,{
     pane:'habitatPane',opacity:.78,interactive:false,
-    attribution:'SLU Skogskarta & SLU Markfuktighet / Skogsstyrelsen'
+    attribution:'NMD2023 trädslag / Naturvårdsverket'
   });
   habitatLayer.addTo(map);
 }
 function loadScoreImage(species){
-  if(scoreImages[species]) return scoreImages[species];
-  scoreImages[species]=new Promise((resolve,reject)=>{
+  if(scoreImageCache.species===species) return scoreImageCache.promise;
+  const promise=new Promise((resolve,reject)=>{
     const img=new Image();
     img.onload=()=>{
       const canvas=document.createElement('canvas');
@@ -1260,17 +1245,18 @@ function loadScoreImage(species){
       resolve(ctx);
     };
     img.onerror=reject;
-    img.src='assets/habitat/'+species+'-score.png';
+    img.src='assets/habitat-sweden/'+species+'-score.png';
   });
-  return scoreImages[species];
+  scoreImageCache={species,promise};
+  return promise;
 }
 function loadSoilImage(){
-  if(scoreImages.soil) return scoreImages.soil;
-  scoreImages.soil=new Promise((resolve,reject)=>{
+  if(auxiliaryImages.soil) return auxiliaryImages.soil;
+  auxiliaryImages.soil=new Promise((resolve,reject)=>{
     const img=new Image();
     img.onload=()=>{
       const canvas=document.createElement('canvas');
-      canvas.width=HABITAT_SIZE.width;canvas.height=HABITAT_SIZE.height;
+      canvas.width=SOIL_SIZE.width;canvas.height=SOIL_SIZE.height;
       const ctx=canvas.getContext('2d',{willReadFrequently:true});
       ctx.drawImage(img,0,0);
       resolve(ctx);
@@ -1278,23 +1264,25 @@ function loadSoilImage(){
     img.onerror=reject;
     img.src='assets/habitat/soil-category.png';
   });
-  return scoreImages.soil;
+  return auxiliaryImages.soil;
 }
-function habitatPixel(latlng){
-  if(!HABITAT_BOUNDS.contains(latlng)) return null;
-  const west=HABITAT_BOUNDS.getWest(),east=HABITAT_BOUNDS.getEast();
-  const south=HABITAT_BOUNDS.getSouth(),north=HABITAT_BOUNDS.getNorth();
+function rasterPixel(latlng,bounds,size){
+  if(!bounds.contains(latlng)) return null;
+  const west=bounds.getWest(),east=bounds.getEast();
+  const south=bounds.getSouth(),north=bounds.getNorth();
   return {
-    x:Math.min(HABITAT_SIZE.width-1,Math.max(0,Math.floor((latlng.lng-west)/(east-west)*HABITAT_SIZE.width))),
-    y:Math.min(HABITAT_SIZE.height-1,Math.max(0,Math.floor((north-latlng.lat)/(north-south)*HABITAT_SIZE.height)))
+    x:Math.min(size.width-1,Math.max(0,Math.floor((latlng.lng-west)/(east-west)*size.width))),
+    y:Math.min(size.height-1,Math.max(0,Math.floor((north-latlng.lat)/(north-south)*size.height)))
   };
 }
+function habitatPixel(latlng){return rasterPixel(latlng,HABITAT_BOUNDS,HABITAT_SIZE);}
+function soilPixel(latlng){return rasterPixel(latlng,SOIL_BOUNDS,SOIL_SIZE);}
 function scoreLabel(score){
-  if(score<20) return 'вне лесной маски или пригодность очень низкая';
+  if(score<20) return 'не лес или тип леса не подходит';
   if(score<40) return 'низкая';
-  if(score<60) return 'умеренная';
-  if(score<80) return 'хорошая';
-  return 'высокая';
+  if(score<60) return 'кандидат';
+  if(score<75) return 'хорошая';
+  return 'лучшая';
 }
 const SOIL_LABELS={0:'нет данных',1:'песок / гравий',2:'морена',3:'глина / ил',4:'торф / заболоченный грунт',5:'скала / тонкая почва',255:'вода'};
 const TEMP_IDEAL={cib:[11,20],tr:[6,16],black:[10,20],regalis:[9,18],matsutake:[7,16]};
@@ -1328,11 +1316,11 @@ function calculateWeather(data,species){
   return {score,rain14,rain7,avgTemp,futureRain};
 }
 function placeAdvice(habitat,weather,soil){
-  if(habitat==null) return 'Для этой точки нет подробного локального растра. Координаты и погода доступны, но лес нужно проверить по подложке и официальным слоям.';
-  if(habitat>=70&&weather>=65) return 'Сильный кандидат для выезда: подходящий лес и хорошие текущие условия. Перед поездкой включи слои выполненных рубок и ограничений.';
-  if(habitat>=60&&weather<45) return 'Лес подходит, но текущие погодные условия слабые. Сохрани координаты и проверь участок после дождей.';
-  if(habitat<40) return 'Участок слабый для выбранного вида. Попробуй соседние цветные кварталы с оценкой выше 60.';
-  return 'Участок можно проверить, но лучше сравнить несколько соседних точек и выбрать место с более высокой оценкой.';
+  if(habitat==null) return 'Точка находится вне национального растра Швеции.';
+  if(habitat>=70&&weather>=65) return 'Подходящие породы леса и хорошие текущие условия. Перед поездкой проверь рубки, влажность, грунт и местные ограничения.';
+  if(habitat>=60&&weather<45) return 'Породы леса подходят, но текущие погодные условия слабые. Сохрани координаты и проверь участок после дождей.';
+  if(habitat<40) return 'Состав пород слабый для выбранного вида. Попробуй соседние цветные участки с оценкой выше 60.';
+  return 'Тип леса можно проверить, но сравни несколько соседних точек и уточни влажность, грунт и возраст древостоя.';
 }
 async function renderSelectedPlace(openPopup=false){
   if(!selectedPoint) return;
@@ -1340,28 +1328,32 @@ async function renderSelectedPlace(openPopup=false){
   const latlng=L.latLng(selectedPoint.lat,selectedPoint.lng);
   const coord=latlng.lat.toFixed(5)+', '+latlng.lng.toFixed(5);
   const pixel=habitatPixel(latlng);
+  const localSoilPixel=soilPixel(latlng);
   const box=document.getElementById('selectedPlace');
   box.classList.add('show');
   document.getElementById('selectedName').textContent=selectedPoint.name||'Выбранное место';
   document.getElementById('selectedCoords').value=coord;
   document.getElementById('selectedGoogle').href='https://www.google.com/maps?q='+latlng.lat+','+latlng.lng;
   document.getElementById('selectedApple').href='https://maps.apple.com/?q='+latlng.lat+','+latlng.lng;
-  document.getElementById('selectedHabitat').textContent=pixel?'расчёт…':'вне зоны модели';
-  document.getElementById('selectedSoil').textContent=pixel?'расчёт…':'нет данных';
+  document.getElementById('selectedHabitat').textContent=pixel?'расчёт…':'вне Швеции';
+  document.getElementById('selectedSoil').textContent=localSoilPixel?'расчёт…':'нет локальных данных';
   document.getElementById('selectedElevation').textContent='загрузка…';
   document.getElementById('selectedRain').textContent='загрузка…';
   document.getElementById('selectedWeather').textContent='загрузка…';
   selectedLayer.clearLayers();
   L.circleMarker(latlng,{radius:8,color:'#fff',weight:3,fillColor:SPECIES[current].color,fillOpacity:1}).addTo(selectedLayer);
   try{
-    const rasterPromise=pixel?Promise.all([loadScoreImage(species),loadSoilImage()]):Promise.resolve([null,null]);
+    const rasterPromise=pixel?Promise.all([
+      loadScoreImage(species),
+      localSoilPixel?loadSoilImage():Promise.resolve(null)
+    ]):Promise.resolve([null,null]);
     const [rasters,weatherData]=await Promise.all([rasterPromise,loadWeather(latlng)]);
     if(request!==selectionRequest||species!==current) return;
     const habitat=rasters[0]?Math.round(rasters[0].getImageData(pixel.x,pixel.y,1,1).data[0]/255*100):null;
-    const soilCode=rasters[1]?rasters[1].getImageData(pixel.x,pixel.y,1,1).data[0]:0;
+    const soilCode=rasters[1]?rasters[1].getImageData(localSoilPixel.x,localSoilPixel.y,1,1).data[0]:0;
     const weather=calculateWeather(weatherData,species);
-    document.getElementById('selectedHabitat').textContent=habitat==null?'вне зоны модели':habitat+' / 100 · '+scoreLabel(habitat);
-    document.getElementById('selectedSoil').textContent=SOIL_LABELS[soilCode]||'нет данных';
+    document.getElementById('selectedHabitat').textContent=habitat==null?'вне Швеции':habitat+' / 100 · '+scoreLabel(habitat);
+    document.getElementById('selectedSoil').textContent=localSoilPixel?(SOIL_LABELS[soilCode]||'нет данных'):'нет локальных данных';
     document.getElementById('selectedElevation').textContent=Number.isFinite(weatherData.elevation)?'≈ '+Math.round(weatherData.elevation)+' м над морем':'нет данных';
     document.getElementById('selectedRain').textContent=weather.rain14.toFixed(0)+' мм · 7 дней: '+weather.rain7.toFixed(0)+' мм';
     document.getElementById('selectedWeather').textContent=weather.score+' / 100 · '+weatherLabel(weather.score);
@@ -1371,7 +1363,7 @@ async function renderSelectedPlace(openPopup=false){
     if(openPopup){
       L.popup().setLatLng(latlng).setContent(
         '<div class="score-pop"><b>'+SPECIES[species].ru+'</b><br>'+
-        '<span class="score">'+(habitat==null?'—':habitat+' / 100')+'</span> '+(habitat==null?'вне зоны модели':'· '+scoreLabel(habitat))+'<br>'+
+        '<span class="score">'+(habitat==null?'—':habitat+' / 100')+'</span> '+(habitat==null?'вне Швеции':'· лес по породам: '+scoreLabel(habitat))+'<br>'+
         '<span class="coords">'+coord+'</span><br>'+
         '<button class="copybtn" onclick="copyText(\''+coord+'\',this)">⧉ Скопировать координаты</button></div>'
       ).openOn(map);
@@ -1392,7 +1384,8 @@ function drawMap(){
   const s=SPECIES[current];
   updateHabitatLayer();
   if(densityLayer) map.removeLayer(densityLayer);
-  densityLayer=L.tileLayer(densityUrl(s.taxon),{opacity:.72,maxZoom:13,pane:'observationsPane'}).addTo(map);
+  densityLayer=L.tileLayer(densityUrl(s.taxon),{opacity:.72,maxZoom:13,pane:'observationsPane'});
+  if(densityEnabled) densityLayer.addTo(map);
   pinLayer.clearLayers();
   const pinIcon=L.divIcon({html:'<div style="font-size:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))">📍</div>',className:'',iconSize:[22,22],iconAnchor:[11,21],popupAnchor:[0,-18]});
   const refIcon=L.divIcon({html:'<div style="font-size:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))">🌲</div>',className:'',iconSize:[22,22],iconAnchor:[11,21],popupAnchor:[0,-18]});
@@ -1420,7 +1413,6 @@ function drawMap(){
 document.getElementById('habitatToggle').addEventListener('click',e=>{
   habitatEnabled=!habitatEnabled;
   if(habitatEnabled) updateHabitatLayer(); else {
-    habitatRenderRequest++;
     if(habitatLayer) map.removeLayer(habitatLayer);
   }
   e.currentTarget.classList.toggle('on',habitatEnabled);
@@ -1430,7 +1422,13 @@ document.getElementById('habitatThreshold').addEventListener('change',e=>{
   habitatThreshold=Number(e.currentTarget.value);
   updateHabitatLayer();
 });
-document.getElementById('habitatFocus').addEventListener('click',()=>map.fitBounds(HABITAT_BOUNDS,{padding:[12,12]}));
+document.getElementById('densityToggle').addEventListener('click',e=>{
+  densityEnabled=!densityEnabled;
+  if(densityEnabled) densityLayer.addTo(map); else map.removeLayer(densityLayer);
+  e.currentTarget.classList.toggle('on',densityEnabled);
+  e.currentTarget.textContent=densityEnabled?'Наблюдения GBIF включены':'Наблюдения GBIF выключены';
+});
+document.getElementById('habitatFocus').addEventListener('click',()=>map.fitBounds([[55.2,11.0],[69.0,24.5]],{padding:[12,12]}));
 document.getElementById('selectedCopy').addEventListener('click',e=>{
   if(!selectedPoint) return;
   copyText(selectedPoint.lat.toFixed(5)+', '+selectedPoint.lng.toFixed(5),e.currentTarget,document.getElementById('selectedCoords'));
@@ -1439,19 +1437,21 @@ document.getElementById('selectedFindBest').addEventListener('click',async e=>{
   if(!selectedPoint) return;
   const button=e.currentTarget;
   const origin=L.latLng(selectedPoint.lat,selectedPoint.lng),pixel=habitatPixel(origin);
-  if(!pixel){button.textContent='Точка вне зоны модели';return;}
+  if(!pixel){button.textContent='Точка вне Швеции';return;}
   const original=button.textContent;button.textContent='Ищу участок…';
   try{
     const ctx=await loadScoreImage(current);
     let best={score:-1,x:pixel.x,y:pixel.y};
-    const radius=70;
-    for(let dy=-radius;dy<=radius;dy+=3){
-      for(let dx=-radius;dx<=radius;dx+=3){
+    const metresPerPixelLat=(HABITAT_BOUNDS.getNorth()-HABITAT_BOUNDS.getSouth())*111320/HABITAT_SIZE.height;
+    const metresPerPixelLng=(HABITAT_BOUNDS.getEast()-HABITAT_BOUNDS.getWest())*111320*Math.cos(origin.lat*Math.PI/180)/HABITAT_SIZE.width;
+    const radius=Math.max(3,Math.round(3000/Math.max(metresPerPixelLat,metresPerPixelLng)));
+    for(let dy=-radius;dy<=radius;dy++){
+      for(let dx=-radius;dx<=radius;dx++){
         const distance=Math.hypot(dx,dy);
         if(distance>radius) continue;
         const x=pixel.x+dx,y=pixel.y+dy;
         if(x<0||y<0||x>=HABITAT_SIZE.width||y>=HABITAT_SIZE.height) continue;
-        const score=ctx.getImageData(x,y,1,1).data[0]/255*100-distance*.08;
+        const score=ctx.getImageData(x,y,1,1).data[0]/255*100-distance*.35;
         if(score>best.score) best={score,x,y};
       }
     }
@@ -1545,7 +1545,7 @@ function render(){
   document.getElementById('fcHab').textContent=s.habitat;
   document.getElementById('fcWhere').textContent=s.where;
   const nRef=s.points.filter(p=>p.ref).length, nFind=s.points.length-nRef;
-  document.getElementById('mapNote').innerHTML='📍 '+nFind+' записей наблюдений Artportalen/GBIF и 🌲 '+nRef+' кандидатных природных территорий. Для 📍 тип леса не выводится как факт, если он не подтверждён исходной записью. Для 🌲 показано описание леса территории, а соответствие виду является экологической оценкой, не доказательством находки.'+
+  document.getElementById('mapNote').innerHTML='<b>Цветной слой NMD2023 доступен по всей Швеции</b> и показывает пригодность типа леса по породам. 📍 '+nFind+' записей наблюдений Artportalen/GBIF и 🌲 '+nRef+' кандидатных природных территорий. Для 📍 тип леса не выводится как факт, если он не подтверждён исходной записью. Для 🌲 показано описание леса территории, а соответствие виду является экологической оценкой, не доказательством находки.'+
     (s.cls==='poison'?' <b style="color:#9c2115">Вид ядовит — точки только для опознавания.</b>':'')+
     (s.cls==='redlist'?' <b style="color:#8a5a12">Вид краснокнижный — собирай бережно.</b>':'');
   drawMap(); drawChart(); drawRegions(); drawCoords();
