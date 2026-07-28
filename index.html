@@ -740,6 +740,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .model-box b{color:#283423}
   .model-box button,.model-box select{border:1px solid #526d45;background:#fff;color:#36502e;border-radius:7px;padding:7px 9px;margin-top:7px;cursor:pointer;min-height:36px}
   .model-box button.on{background:#3f5c35;color:#fff}
+  .model-box .location-button{display:inline-flex;align-items:center;gap:7px;min-height:44px;font-weight:700}
+  .location-button svg{width:18px;height:18px;flex:none}
+  .location-button:disabled{cursor:wait;opacity:.7}
+  .location-status{display:block;min-height:1.25em;margin-top:5px;color:#5c6752}
+  .location-status.error{color:#9c2115;font-weight:600}
   .score-pop{min-width:230px}
   .score-pop .score{font-size:1.25rem;font-weight:800;color:var(--sp)}
   .score-pop .coords{font:600 .82rem ui-monospace,SFMono-Regular,Menlo,monospace;color:#62695a}
@@ -861,8 +866,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <div class="model-box">
         <b>Подходящие типы леса · вся Швеция</b><br>
         Национальный слой построен по классам NMD2023: сосновый, еловый, смешанный хвойный и лиственный лес — отдельно на сухом и влажном грунте. Цвет есть только на распознанной лесной территории.
-        <br><button id="habitatFocus" type="button">Показать всю Швецию</button>
+        <br><button id="locateMe" class="location-button" type="button" aria-describedby="locationStatus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+            <circle cx="12" cy="12" r="8"></circle>
+          </svg>
+          <span id="locateMeLabel">Моё местоположение</span>
+        </button>
+        <button id="habitatFocus" type="button">Показать всю Швецию</button>
         <button id="habitatToggle" class="on" type="button">Слой пригодности включён</button>
+        <span id="locationStatus" class="location-status" role="status" aria-live="polite"></span>
         <label for="habitatThreshold"><br>Показывать оценку от</label>
         <select id="habitatThreshold">
           <option value="40" selected>40 · все кандидаты</option>
@@ -1214,7 +1228,7 @@ L.control.layers({
   'Светлая карта':lightBase
 },officialLayers,{position:'topright',collapsed:true}).addTo(map);
 map.fitBounds([[55.2,11.0],[69.0,24.5]]);
-let densityLayer=null, densityEnabled=false, pinLayer=L.layerGroup().addTo(map), selectedLayer=L.layerGroup().addTo(map);
+let densityLayer=null, densityEnabled=false, pinLayer=L.layerGroup().addTo(map), selectedLayer=L.layerGroup().addTo(map), locationLayer=L.layerGroup().addTo(map);
 let habitatLayer=null, habitatEnabled=true, habitatThreshold=40;
 let scoreImageCache={species:null,promise:null};
 const auxiliaryImages={};
@@ -1427,6 +1441,56 @@ document.getElementById('densityToggle').addEventListener('click',e=>{
   if(densityEnabled) densityLayer.addTo(map); else map.removeLayer(densityLayer);
   e.currentTarget.classList.toggle('on',densityEnabled);
   e.currentTarget.textContent=densityEnabled?'Наблюдения GBIF включены':'Наблюдения GBIF выключены';
+});
+document.getElementById('locateMe').addEventListener('click',e=>{
+  const button=e.currentTarget;
+  const label=document.getElementById('locateMeLabel');
+  const status=document.getElementById('locationStatus');
+  status.classList.remove('error');
+  if(!navigator.geolocation){
+    status.classList.add('error');
+    status.textContent='Этот браузер не поддерживает определение местоположения.';
+    return;
+  }
+  button.disabled=true;
+  button.setAttribute('aria-busy','true');
+  label.textContent='Определяю…';
+  status.textContent='Браузер может запросить разрешение на геолокацию.';
+  navigator.geolocation.getCurrentPosition(position=>{
+    const latlng=L.latLng(position.coords.latitude,position.coords.longitude);
+    const accuracy=Math.max(1,Math.round(position.coords.accuracy||0));
+    locationLayer.clearLayers();
+    L.circle(latlng,{
+      radius:accuracy,color:'#2463a7',weight:1,fillColor:'#4f8fd3',fillOpacity:.12,
+      interactive:false
+    }).addTo(locationLayer);
+    L.circleMarker(latlng,{
+      radius:7,color:'#fff',weight:3,fillColor:'#2463a7',fillOpacity:1,
+      interactive:false
+    }).addTo(locationLayer);
+    const targetZoom=accuracy<=100?15:accuracy<=500?13:11;
+    map.setView(latlng,Math.max(map.getZoom(),targetZoom));
+    status.textContent='Местоположение найдено · точность ±'+accuracy+' м.';
+    button.disabled=false;
+    button.removeAttribute('aria-busy');
+    label.textContent='Обновить местоположение';
+    selectPlace(latlng,'Моё местоположение',true);
+  },error=>{
+    const messages={
+      1:'Доступ к геопозиции запрещён. Разреши его для этого сайта в настройках браузера и попробуй снова.',
+      2:'Местоположение недоступно. Проверь GPS или подключение и попробуй снова.',
+      3:'Не удалось определить местоположение за 15 секунд. Попробуй ещё раз.'
+    };
+    status.classList.add('error');
+    status.textContent=messages[error.code]||'Не удалось определить местоположение. Попробуй ещё раз.';
+    button.disabled=false;
+    button.removeAttribute('aria-busy');
+    label.textContent='Моё местоположение';
+  },{
+    enableHighAccuracy:true,
+    timeout:15000,
+    maximumAge:60000
+  });
 });
 document.getElementById('habitatFocus').addEventListener('click',()=>map.fitBounds([[55.2,11.0],[69.0,24.5]],{padding:[12,12]}));
 document.getElementById('selectedCopy').addEventListener('click',e=>{
