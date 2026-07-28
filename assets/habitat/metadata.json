@@ -1,5 +1,5 @@
 {
-  "model": "varmland-habitat-v2",
+  "model": "varmland-habitat-v3",
   "generated": "2026-07-27",
   "bboxWgs84": [
     12.7,
@@ -11,6 +11,13 @@
   "height": 720,
   "cellSourceMetres": 12.5,
   "scoreMeaning": "habitat suitability, not mushroom occurrence probability",
+  "forestMask": "tree volume >= 20, valid mean diameter and SLU moisture class",
+  "displayBands": {
+    "hidden": "<40",
+    "candidate": "40-59",
+    "good": "60-74",
+    "best": "75-100"
+  },
   "inputs": {
     "pine": "sksSLUskogskartaTallVolym17.tif",
     "spruce": "sksSLUskogskartaGranVolym17.tif",
@@ -41,28 +48,28 @@
   },
   "stats": {
     "cib": {
-      "p50": 65.3,
-      "p90": 78.2,
+      "p50": 67.9,
+      "p90": 79.1,
       "max": 91.8
     },
     "tr": {
-      "p50": 48.3,
-      "p90": 69.2,
+      "p50": 52.3,
+      "p90": 70.8,
       "max": 95.3
     },
     "black": {
-      "p50": 28.6,
-      "p90": 39.9,
+      "p50": 30.8,
+      "p90": 41.1,
       "max": 94.9
     },
     "regalis": {
-      "p50": 59.0,
-      "p90": 71.3,
+      "p50": 61.5,
+      "p90": 72.1,
       "max": 85.5
     },
     "matsutake": {
-      "p50": 44.2,
-      "p90": 67.9,
+      "p50": 50.5,
+      "p90": 69.6,
       "max": 92.7
     }
   }

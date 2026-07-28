@@ -697,7 +697,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   :root{--bg:#f5f4ef;--card:#fff;--ink:#23261f;--muted:#6c7162;--line:#e4e1d7;--accent:#3a3a34}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:var(--bg);color:var(--ink);line-height:1.55}
+    background:var(--bg);color:var(--ink);line-height:1.55;overflow-x:hidden}
   .wrap{max-width:1080px;margin:0 auto;padding:0 18px 70px}
   header.hero{background:linear-gradient(135deg,#242a20,#3c4632 70%,#556a40);color:#fff;padding:40px 18px 34px;text-align:center}
   header.hero h1{margin:0 auto;max-width:900px;font-size:2rem;line-height:1.15}
@@ -719,7 +719,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .banner.redlist{background:#fdf1dd;color:#8a5a12;border:1px solid #eecfa0}
   h2{font-size:1.35rem;margin:34px 0 4px;color:#2f3a26}
   .lead{color:var(--muted);margin:0 0 14px;max-width:820px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 4px 14px rgba(30,40,20,.05);margin-top:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 4px 14px rgba(30,40,20,.05);margin-top:14px;min-width:0}
   .fc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}
   .fcell{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--sp);border-radius:12px;padding:14px 16px}
   .fcell h3{margin:0 0 6px;font-size:.95rem;color:#2f3a26;display:flex;align-items:center;gap:7px}
@@ -729,11 +729,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .legend{font-size:.8rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;align-items:center}
   .legend b{color:var(--ink)}
   .sw-hex{display:inline-block;width:13px;height:13px;background:#e8552f;border-radius:3px;vertical-align:middle;margin-right:4px}
-  .sw-habitat{display:inline-block;width:48px;height:10px;border-radius:5px;vertical-align:middle;margin-right:5px;background:linear-gradient(90deg,#fae13c,#e8a317,#9b3152)}
+  .habitat-legend{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .habitat-key{display:inline-flex;gap:4px;align-items:center;white-space:nowrap}
+  .habitat-key i{display:inline-block;width:15px;height:11px;border-radius:3px;border:1px solid rgba(20,45,25,.18)}
+  .habitat-key .candidate{background:#ebbe3a}
+  .habitat-key .good{background:#48844f}
+  .habitat-key .best{background:#185532}
   .map-tools{display:grid;grid-template-columns:minmax(260px,1fr) 1.7fr;gap:12px;margin-top:12px}
   .model-box{background:#f3f7ed;border:1px solid #d7e2ca;border-radius:10px;padding:11px 13px;font-size:.82rem;color:#4b5740}
   .model-box b{color:#283423}
-  .model-box button{border:1px solid #526d45;background:#fff;color:#36502e;border-radius:7px;padding:5px 9px;margin-top:7px;cursor:pointer}
+  .model-box button,.model-box select{border:1px solid #526d45;background:#fff;color:#36502e;border-radius:7px;padding:7px 9px;margin-top:7px;cursor:pointer;min-height:36px}
   .model-box button.on{background:#3f5c35;color:#fff}
   .score-pop{min-width:230px}
   .score-pop .score{font-size:1.25rem;font-weight:800;color:var(--sp)}
@@ -768,6 +773,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#2f3a26}
   .bar{height:8px;background:var(--sp);border-radius:4px;display:inline-block;vertical-align:middle}
   /* coordinate list */
+  #coordList{overflow-x:auto;max-width:100%;min-width:0}
   .coordtbl td{vertical-align:middle}
   .mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:600}
   .copybtn{border:1px solid var(--sp);color:var(--sp);background:#fff;border-radius:7px;padding:4px 9px;font-size:.8rem;cursor:pointer;white-space:nowrap}
@@ -841,7 +847,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   <div class="card">
     <div id="map"></div>
     <div class="legend">
-      <span><span class="sw-habitat"></span><b>Пригодность лесного биотопа:</b> слабая → высокая</span>
+      <span class="habitat-legend"><b>Только лесные кандидаты:</b>
+        <span class="habitat-key"><i class="candidate"></i>40–59</span>
+        <span class="habitat-key"><i class="good"></i>60–74</span>
+        <span class="habitat-key"><i class="best"></i>75–100</span>
+      </span>
       <span><span class="sw-hex"></span><b>Плотность</b> находок (GBIF)</span>
       <span>📍 <b>Свежая находка</b> (см. список ниже)</span>
       <span>🌲 <b>Кандидатный биотоп</b> — описание леса подходит виду; наличие вида в точке не гарантировано</span>
@@ -849,10 +859,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
     <div class="map-tools">
       <div class="model-box">
-        <b>Модель Вермланда 12,5 м + грунты SGU</b><br>
-        Породы и структура леса, влажность, песок/морена/глина/торф/скала. Нажми на место или попроси карту найти лучший участок в радиусе 3 км.
+        <b>Лесная маска SLU + пригодность вида</b><br>
+        Цвет показывается только внутри распознанного древостоя. Граница может отличаться от OSM: для проверки включён официальный покров NMD 2023.
         <br><button id="habitatFocus" type="button">Показать Vålberg–Karlstad</button>
         <button id="habitatToggle" class="on" type="button">Слой пригодности включён</button>
+        <label for="habitatThreshold"><br>Показывать оценку от</label>
+        <select id="habitatThreshold">
+          <option value="40" selected>40 · все кандидаты</option>
+          <option value="60">60 · хорошие</option>
+          <option value="75">75 · лучшие</option>
+        </select>
       </div>
       <div class="model-box">
         <b>Что означает число</b><br>
@@ -1151,6 +1167,8 @@ let current='cib', chart=null;
 const map=L.map('map',{scrollWheelZoom:false}).setView([62.5,16.5],4);
 map.createPane('habitatPane');
 map.getPane('habitatPane').style.zIndex=320;
+map.createPane('forestReferencePane');
+map.getPane('forestReferencePane').style.zIndex=300;
 map.createPane('officialForestPane');
 map.getPane('officialForestPane').style.zIndex=340;
 map.createPane('observationsPane');
@@ -1172,14 +1190,15 @@ function sksWms(service,layer,opacity){
     pane:'officialForestPane',attribution:'Skogsstyrelsen'
   });
 }
+const nmdForest=L.tileLayer.wms('https://geodata.naturvardsverket.se/inspire/lc-nmd/ows?',{
+  layers:'LC.LandCoverRaster.Bas_2.0',format:'image/png',transparent:true,opacity:.42,
+  pane:'forestReferencePane',attribution:'NMD / Naturvårdsverket'
+}).addTo(map);
 const officialLayers={
   'SGU · тип грунта':L.imageOverlay('assets/habitat/soil-overlay.png',HABITAT_BOUNDS,{
     pane:'officialForestPane',opacity:.66,attribution:'SGU Jordarter'
   }),
-  'NMD 2023 · покров и тип леса':L.tileLayer.wms('https://geodata.naturvardsverket.se/inspire/lc-nmd/ows?',{
-    layers:'LC.LandCoverRaster.Bas_2.0',format:'image/png',transparent:true,opacity:.58,
-    pane:'officialForestPane',attribution:'NMD / Naturvårdsverket'
-  }),
+  'NMD 2023 · покров и тип леса':nmdForest,
   'Skogsstyrelsen · заболоченный лес':sksWms('GeodataportalVisaSumpskog','Sumpskog_Skogsstyrelsen',.55),
   'Skogsstyrelsen · ключевые биотопы':sksWms('GeodataportalVisaNyckelbiotop','Nyckelbiotop_Skogsstyrelsen',.65),
   'Skogsstyrelsen · объекты природной ценности':sksWms('GeodataportalVisaObjektnaturvarde','Objektnaturvarde_Skogsstyrelsen',.65),
@@ -1193,7 +1212,7 @@ L.control.layers({
 },officialLayers,{position:'topright',collapsed:true}).addTo(map);
 map.fitBounds([[55.2,11.0],[69.0,24.5]]);
 let densityLayer=null, pinLayer=L.layerGroup().addTo(map), selectedLayer=L.layerGroup().addTo(map);
-let habitatLayer=null, habitatEnabled=true;
+let habitatLayer=null, habitatEnabled=true, habitatThreshold=40, habitatRenderRequest=0;
 const scoreImages={};
 let selectedPoint=null, selectionRequest=0;
 const weatherCache={};
@@ -1201,13 +1220,33 @@ const weatherCache={};
 function densityUrl(taxon){
   return 'https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?taxonKey='+taxon+'&country=SE&bin=hex&hexPerTile=30&style=classic-noborder.poly';
 }
-function updateHabitatLayer(){
+function habitatColour(score){
+  if(score>=75) return [24,85,50,225];
+  if(score>=60) return [72,132,79,190];
+  return [235,190,58,150];
+}
+async function updateHabitatLayer(){
+  const request=++habitatRenderRequest;
   if(habitatLayer) map.removeLayer(habitatLayer);
-  habitatLayer=L.imageOverlay('assets/habitat/'+current+'-overlay.png',HABITAT_BOUNDS,{
+  if(!habitatEnabled) return;
+  const ctx=await loadScoreImage(current);
+  if(request!==habitatRenderRequest) return;
+  const source=ctx.getImageData(0,0,HABITAT_SIZE.width,HABITAT_SIZE.height).data;
+  const canvas=document.createElement('canvas');
+  canvas.width=HABITAT_SIZE.width;canvas.height=HABITAT_SIZE.height;
+  const out=canvas.getContext('2d').createImageData(HABITAT_SIZE.width,HABITAT_SIZE.height);
+  for(let i=0;i<source.length;i+=4){
+    const score=source[i]/255*100;
+    if(score<habitatThreshold) continue;
+    const colour=habitatColour(score);
+    out.data[i]=colour[0];out.data[i+1]=colour[1];out.data[i+2]=colour[2];out.data[i+3]=colour[3];
+  }
+  canvas.getContext('2d').putImageData(out,0,0);
+  habitatLayer=L.imageOverlay(canvas.toDataURL('image/png'),HABITAT_BOUNDS,{
     pane:'habitatPane',opacity:.78,interactive:false,
     attribution:'SLU Skogskarta & SLU Markfuktighet / Skogsstyrelsen'
   });
-  if(habitatEnabled) habitatLayer.addTo(map);
+  habitatLayer.addTo(map);
 }
 function loadScoreImage(species){
   if(scoreImages[species]) return scoreImages[species];
@@ -1251,7 +1290,7 @@ function habitatPixel(latlng){
   };
 }
 function scoreLabel(score){
-  if(score<20) return 'лес по модели не распознан или пригодность очень низкая';
+  if(score<20) return 'вне лесной маски или пригодность очень низкая';
   if(score<40) return 'низкая';
   if(score<60) return 'умеренная';
   if(score<80) return 'хорошая';
@@ -1380,9 +1419,16 @@ function drawMap(){
 
 document.getElementById('habitatToggle').addEventListener('click',e=>{
   habitatEnabled=!habitatEnabled;
-  if(habitatEnabled) habitatLayer.addTo(map); else map.removeLayer(habitatLayer);
+  if(habitatEnabled) updateHabitatLayer(); else {
+    habitatRenderRequest++;
+    if(habitatLayer) map.removeLayer(habitatLayer);
+  }
   e.currentTarget.classList.toggle('on',habitatEnabled);
   e.currentTarget.textContent=habitatEnabled?'Слой пригодности включён':'Слой пригодности выключен';
+});
+document.getElementById('habitatThreshold').addEventListener('change',e=>{
+  habitatThreshold=Number(e.currentTarget.value);
+  updateHabitatLayer();
 });
 document.getElementById('habitatFocus').addEventListener('click',()=>map.fitBounds(HABITAT_BOUNDS,{padding:[12,12]}));
 document.getElementById('selectedCopy').addEventListener('click',e=>{

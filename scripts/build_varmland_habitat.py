@@ -146,20 +146,29 @@ def suitability(
     moisture: np.ndarray,
     maturity: np.ndarray,
     forest_structure: np.ndarray,
+    forest_mask: np.ndarray,
     soil: np.ndarray,
 ) -> np.ndarray:
-    score = forest_structure * (0.52 * host + 0.23 * moisture + 0.17 * maturity + 0.08 * soil)
+    # Structure adjusts the score inside forest, but never creates suitability
+    # outside the independently calculated forest mask.
+    structure_weight = 0.70 + 0.30 * forest_structure
+    score = structure_weight * (
+        0.52 * host + 0.23 * moisture + 0.17 * maturity + 0.08 * soil
+    )
+    score[~forest_mask] = 0
     return np.clip(np.nan_to_num(score) * 100.0, 0, 100)
 
 
-def make_display(score: np.ndarray, color: tuple[int, int, int]) -> np.ndarray:
+def make_display(score: np.ndarray, forest_mask: np.ndarray) -> np.ndarray:
+    """Render only actionable candidates, using fixed semantic score colours."""
     rgba = np.zeros((*score.shape, 4), dtype=np.uint8)
-    strength = np.clip(score / 100.0, 0, 1)
-    low = np.array((250, 225, 60), dtype=np.float32)
-    high = np.array(color, dtype=np.float32)
-    rgb = low[None, None, :] * (1 - strength[..., None]) + high[None, None, :] * strength[..., None]
-    rgba[..., :3] = rgb.astype(np.uint8)
-    rgba[..., 3] = np.where(score >= 20, 45 + strength * 175, 0).astype(np.uint8)
+    bands = (
+        (40, 60, (235, 190, 58, 150)),
+        (60, 75, (72, 132, 79, 190)),
+        (75, 101, (24, 85, 50, 225)),
+    )
+    for low, high, colour in bands:
+        rgba[forest_mask & (score >= low) & (score < high)] = colour
     return rgba
 
 
@@ -187,11 +196,21 @@ def main() -> None:
     shares = [item / safe_total for item in (pine, spruce, birch, oak, beech)]
     pine_s, spruce_s, birch_s, oak_s, beech_s = shares
 
-    # Total estimated volume is used only as a soft forest-structure mask.
+    # A hard mask prevents fields, roads and built-up pixels from receiving a
+    # habitat colour. The volume threshold is deliberately conservative.
     # Mean diameter is a proxy for stand maturity, not a measured stand age.
-    forest_structure = np.clip((total - 8) / 80, 0, 1)
+    forest_mask = (
+        np.isfinite(total)
+        & np.isfinite(data["diameter"])
+        & (total >= 20)
+        & np.isin(data["moisture"], (1, 2, 3))
+    )
+    forest_structure = np.clip((total - 20) / 70, 0, 1)
     maturity = np.clip((np.maximum(data["diameter"], 0) - 8) / 22, 0, 1)
     moist = data["moisture"]
+    Image.fromarray((forest_mask * 255).astype(np.uint8), "L").save(
+        args.output_dir / "forest-mask.png", optimize=True
+    )
     soil_classes = read_soil_grid(args.soil_geojson)
     Image.fromarray(soil_classes, "L").save(args.output_dir / "soil-category.png", optimize=True)
     Image.fromarray(make_soil_display(soil_classes), "RGBA").save(
@@ -224,15 +243,22 @@ def main() -> None:
 
     stats: dict[str, dict[str, float]] = {}
     for species in COLORS:
-        score = suitability(host[species], moisture[species], maturity, forest_structure, soil[species])
+        score = suitability(
+            host[species],
+            moisture[species],
+            maturity,
+            forest_structure,
+            forest_mask,
+            soil[species],
+        )
         score[soil_classes == 255] = 0
         Image.fromarray(np.rint(score * 2.55).astype(np.uint8), "L").save(
             args.output_dir / f"{species}-score.png", optimize=True
         )
-        Image.fromarray(make_display(score, COLORS[species]), "RGBA").save(
+        Image.fromarray(make_display(score, forest_mask), "RGBA").save(
             args.output_dir / f"{species}-overlay.png", optimize=True
         )
-        forest_scores = score[forest_structure > 0.15]
+        forest_scores = score[forest_mask]
         stats[species] = {
             "p50": round(float(np.percentile(forest_scores, 50)), 1),
             "p90": round(float(np.percentile(forest_scores, 90)), 1),
@@ -240,13 +266,15 @@ def main() -> None:
         }
 
     metadata = {
-        "model": "varmland-habitat-v2",
+        "model": "varmland-habitat-v3",
         "generated": "2026-07-27",
         "bboxWgs84": list(BBOX_WGS84),
         "width": WIDTH,
         "height": HEIGHT,
         "cellSourceMetres": 12.5,
         "scoreMeaning": "habitat suitability, not mushroom occurrence probability",
+        "forestMask": "tree volume >= 20, valid mean diameter and SLU moisture class",
+        "displayBands": {"hidden": "<40", "candidate": "40-59", "good": "60-74", "best": "75-100"},
         "inputs": {name: path.name for name, path in paths.items()},
         "soilInput": [path.name for path in args.soil_geojson],
         "soilCategories": {str(key): value for key, value in SOIL_CATEGORIES.items()},

@@ -4,3 +4,6 @@ Thumbs.db
 _check.js
 
 .claude/
+
+# Large source geodata kept locally; generated web rasters live in assets/habitat/.
+data/raw/
