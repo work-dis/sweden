@@ -1,6 +1,6 @@
 {
   "model": "sweden-forest-class-v1",
-  "generated": "2026-07-28",
+  "generated": "2026-07-29",
   "bboxWgs84": [
     10.4,
     55.15,
@@ -10,6 +10,8 @@
   "width": 2200,
   "height": 6000,
   "sourceCellMetres": 10,
+  "preservationFactor": 2,
+  "aggregation": "nearest samples at 2x web resolution, then maximum suitability and forest presence across each 2x2 group",
   "webRasterMeaning": "forest-type suitability, not full habitat or occurrence probability",
   "input": "NMD2023bas_v2_1.tif",
   "forestClasses": [
@@ -29,6 +31,10 @@
     125,
     126,
     127
+  ],
+  "temporaryForestClasses": [
+    118,
+    128
   ],
   "classScores": {
     "cib": {
@@ -131,26 +137,27 @@
   "limitations": [
     "national layer does not include soil, moisture or stand continuity",
     "web raster is aggregated from the 10 m source",
+    "small forest fragments are preserved but represented by a full web cell",
     "recent logging and fruiting weather are separate checks"
   ],
   "stats": {
     "cib": {
-      "p50": 58.0,
+      "p50": 78.0,
       "p90": 78.0,
       "max": 82.0
     },
     "tr": {
-      "p50": 35.0,
+      "p50": 65.0,
       "p90": 78.0,
       "max": 88.0
     },
     "black": {
-      "p50": 8.0,
-      "p90": 35.0,
+      "p50": 12.0,
+      "p90": 45.0,
       "max": 90.0
     },
     "regalis": {
-      "p50": 70.0,
+      "p50": 80.0,
       "p90": 82.0,
       "max": 82.0
     },

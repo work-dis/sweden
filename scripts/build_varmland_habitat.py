@@ -14,15 +14,21 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-import numpy as np
-import rasterio
-from PIL import Image
-from rasterio.features import rasterize
-from rasterio.transform import from_bounds
-from rasterio.vrt import WarpedVRT
-from rasterio.warp import Resampling
+try:
+    import numpy as np
+    import rasterio
+    from PIL import Image
+    from rasterio.features import rasterize
+    from rasterio.transform import from_bounds
+    from rasterio.vrt import WarpedVRT
+    from rasterio.warp import Resampling
+except ImportError as e:
+    print(f"Ошибка: {e}", file=sys.stderr)
+    print("Запусти через .venv: .venv/bin/python3 scripts/build_varmland_habitat.py ...", file=sys.stderr)
+    sys.exit(1)
 
 
 BBOX_WGS84 = (12.70, 59.25, 14.25, 59.52)

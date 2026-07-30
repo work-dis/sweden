@@ -1,0 +1,22 @@
+{
+  "name": "Грибные биотопы Швеции",
+  "short_name": "Sweden Mushrooms",
+  "description": "Интерактивная карта грибных биотопов Швеции — леса, районы, наблюдения и погода",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f5f4ef",
+  "theme_color": "#3c4632",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

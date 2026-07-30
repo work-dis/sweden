@@ -1,11 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 .DS_Store
 Thumbs.db
 *.tmp
-_check.js
-__pycache__/
-*.py[cod]
-
-.claude/
 
 # Large source geodata kept locally; generated web rasters live in assets/habitat/.
 data/raw/
