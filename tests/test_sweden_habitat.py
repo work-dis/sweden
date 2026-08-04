@@ -48,6 +48,24 @@ class TestClassScores:
         result = reduce_coverage(mask)
         assert result[0, 0] == 2  # 2 of 4 subcells
 
+    def test_reduce_mode_preserves_category(self):
+        from build_sweden_habitat import reduce_mode, PRESERVATION_FACTOR, HEIGHT, WIDTH
+        values = np.zeros((HEIGHT * PRESERVATION_FACTOR, WIDTH * PRESERVATION_FACTOR), dtype=np.uint8)
+        values[0, 0] = 3
+        values[0, 1] = 3
+        values[1, 0] = 3
+        values[1, 1] = 1
+        result = reduce_mode(values, (1, 2, 3, 4, 5, 255))
+        assert result[0, 0] == 3
+
+    def test_categorical_preference_does_not_overflow(self):
+        from build_sweden_habitat import apply_categorical_preference
+        score = np.array([[80, 80, 80]], dtype=np.uint8)
+        classes = np.array([[1, 2, 255]], dtype=np.uint8)
+        result = apply_categorical_preference(score, classes, [1.0, 1.0, 0.5], 0.15)
+        assert result.tolist() == [[80, 74, 68]]
+        assert result.max() <= 100
+
     def test_forest_classes_defined(self):
         """Test that forest classes are properly defined."""
         from build_sweden_habitat import FOREST_CLASSES, TEMPORARY_FOREST_CLASSES

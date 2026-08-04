@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 try:
@@ -273,7 +274,7 @@ def main() -> None:
 
     metadata = {
         "model": "varmland-habitat-v3",
-        "generated": "2026-07-27",
+        "generated": date.today().isoformat(),
         "bboxWgs84": list(BBOX_WGS84),
         "width": WIDTH,
         "height": HEIGHT,

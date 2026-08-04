@@ -1,0 +1,57 @@
+{
+  "cib": {
+    "taxon_key": 5249504,
+    "downloaded_records": 15497,
+    "spatial_cells": 1838,
+    "train_cells": 1470,
+    "test_cells": 368,
+    "pseudo_absences": 3680,
+    "auc_roc": 0.5463,
+    "precision_at_k": 0.1745,
+    "k": 368
+  },
+  "tr": {
+    "taxon_key": 2554536,
+    "downloaded_records": 9790,
+    "spatial_cells": 1504,
+    "train_cells": 1203,
+    "test_cells": 301,
+    "pseudo_absences": 3010,
+    "auc_roc": 0.5124,
+    "precision_at_k": 0.1069,
+    "k": 301
+  },
+  "black": {
+    "taxon_key": 2554662,
+    "downloaded_records": 3047,
+    "spatial_cells": 813,
+    "train_cells": 650,
+    "test_cells": 163,
+    "pseudo_absences": 1630,
+    "auc_roc": 0.6838,
+    "precision_at_k": 0.3727,
+    "k": 163
+  },
+  "regalis": {
+    "taxon_key": 5240248,
+    "downloaded_records": 4434,
+    "spatial_cells": 1050,
+    "train_cells": 840,
+    "test_cells": 210,
+    "pseudo_absences": 2100,
+    "auc_roc": 0.5615,
+    "precision_at_k": 0.1317,
+    "k": 210
+  },
+  "matsutake": {
+    "taxon_key": 5241820,
+    "downloaded_records": 5456,
+    "spatial_cells": 688,
+    "train_cells": 550,
+    "test_cells": 138,
+    "pseudo_absences": 1380,
+    "auc_roc": 0.6571,
+    "precision_at_k": 0.1432,
+    "k": 138
+  }
+}

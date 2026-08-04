@@ -44,6 +44,13 @@
 
 ## Запуск
 
+Требуется Python 3.11+. Для пересборки растров и тестов создайте окружение:
+
+```bash
+uv venv
+uv pip install -e '.[dev]'
+```
+
 Для полноценной работы оценки по клику запустите локальный сервер:
 
 ```bash
@@ -52,7 +59,8 @@ python3 -m http.server 8765
 
 Затем откройте `http://localhost:8765/`. Интернет нужен для тайлов карты,
 динамического слоя GBIF, WMS Skogsstyrelsen/NMD и погодных данных Open-Meteo.
-Основные библиотеки включены в `index.html`.
+Leaflet и Chart.js подключаются из CDN в `index.html` и кэшируются service
+worker после первого успешного запуска.
 
 ## Проверка данных
 
@@ -60,6 +68,19 @@ python3 -m http.server 8765
 [`FOREST_AUDIT.md`](./FOREST_AUDIT.md).
 
 Снимок агрегатов GBIF обновлён 27.07.2026.
+
+```bash
+make test       # модульные тесты
+make validate   # целостность, формат и размеры сгенерированных PNG
+make validate_model  # полная пространственная валидация по GBIF
+```
+
+Полная валидация записывает `validation-results.json` и обновляет
+`VALIDATION.md`. Короткая сетевая проверка:
+
+```bash
+make validate_model VALIDATION_ARGS="--max-records 600"
+```
 
 Район Karlstad–Molkom–Brattfors дополнен проверенными лесными территориями
 Råglandaberget, Nedre Prostgårdsälven, Lämpenshålan и Kittelfältet.
@@ -80,8 +101,10 @@ Naturvårdsverket. Он классифицирует сосновые, елов�
 Серая маска показывает все распознанные леса, янтарная — лесную землю,
 временно оставшуюся без древостоя после рубки/пожара либо с молодняком ниже
 порога NMD. Цвет оценивает совместимость класса текущего леса с выбранным видом
-гриба по всей Швеции. Национальная оценка не
-включает грунт, влажность, непрерывность древостоя, свежие рубки и погоду,
+гриба по всей Швеции. Текущий опубликованный национальный растр не включает
+грунт и влажность; генератор умеет учитывать их при передаче `--soil-geojson`
+и `--moisture-raster`. Непрерывность древостоя, свежие рубки и погода не входят
+в постоянный растр,
 поэтому называется пригодностью **по типу леса**, а не полной пригодностью
 биотопа или вероятностью находки.
 
@@ -94,6 +117,10 @@ python3 scripts/build_sweden_habitat.py \
   --base-raster data/raw/sweden/NMD2023bas_v2_1.tif \
   --output-dir assets/habitat-sweden
 ```
+
+Поддерживаемые дополнительные входы перечисляет команда
+`python3 scripts/build_sweden_habitat.py --help`. Доли отдельных пород, высота,
+диаметр и объём для общешведской модели пока остаются задачами roadmap.
 
 Источники: [Naturvårdsverket — NMD и дополнительные слои](https://www.naturvardsverket.se/verktyg-och-tjanster/kartor-och-karttjanster/nationella-marktackedata/ladda-ner-nationella-marktackedata/),
 [Skogsstyrelsen — национальные лесные характеристики](https://www.skogsstyrelsen.se/en/digital-open-forest-data/national-forest-attribute-maps/).

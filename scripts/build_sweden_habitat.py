@@ -6,12 +6,8 @@ spruce, mixed conifer, mixed deciduous/conifer, common deciduous and noble
 deciduous forest, separately on firm and wet ground, at 10 m.
 
 Optional inputs for refined scoring:
-  --species-fraction-raster : NMD2023 additional species fraction GeoTIFF
-  --soil-geojson            : SGU Jordarter GeoJSON for soil type nationwide
-  --height-raster           : Skogliga grunddata height GeoTIFF
-  --diameter-raster         : Skogliga grunddata mean diameter GeoTIFF
-  --volume-raster           : Skogliga grunddata total volume GeoTIFF
-  --moisture-raster         : SLU Markfuktighet classified moisture GeoTIFF
+  --soil-geojson      : SGU Jordarter GeoJSON for soil type nationwide
+  --moisture-raster   : SLU Markfuktighet classified moisture GeoTIFF
 
 The web output is intentionally aggregated. It identifies potentially suitable
 host-forest types across Sweden; moisture, soil chemistry, stand continuity,
@@ -26,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 try:
@@ -165,6 +162,36 @@ def reduce_mean(values: np.ndarray) -> np.ndarray:
     ).mean(axis=(1, 3))
 
 
+def reduce_mode(values: np.ndarray, categories: tuple[int, ...]) -> np.ndarray:
+    """Reduce the fine grid by the most frequent categorical value per block."""
+    blocks = values.reshape(
+        HEIGHT, PRESERVATION_FACTOR, WIDTH, PRESERVATION_FACTOR
+    )
+    result = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
+    best_count = (blocks == 0).sum(axis=(1, 3))
+    for category in categories:
+        count = (blocks == category).sum(axis=(1, 3))
+        replace = count > best_count
+        result[replace] = category
+        best_count[replace] = count[replace]
+    return result
+
+
+def apply_categorical_preference(
+    score: np.ndarray,
+    classes: np.ndarray,
+    preferences: tuple[float, ...] | list[float],
+    weight: float,
+) -> np.ndarray:
+    """Blend a 0..100 score with a categorical preference without overflow."""
+    factor = np.full(classes.shape, preferences[0], dtype=np.float32)
+    for category, value in enumerate(preferences[1:], start=1):
+        factor[classes == category] = value
+    factor[classes == 255] = 0.0
+    refined = score.astype(np.float32) * ((1.0 - weight) + weight * factor)
+    return np.rint(np.clip(refined, 0, 100)).astype(np.uint8)
+
+
 def make_forest_reference(
     coverage: np.ndarray, temporary_coverage: np.ndarray
 ) -> np.ndarray:
@@ -248,19 +275,8 @@ def main() -> None:
     parser.add_argument("--base-raster", required=True, type=Path,
                         help="NMD2023 base layer GeoTIFF (basskikt v2.1)")
     parser.add_argument("--output-dir", default=Path("assets/habitat-sweden"), type=Path)
-    # Phase 1.1: NMD2023 species fractions
-    parser.add_argument("--species-fraction-raster", type=Path, default=None,
-                        help="NMD2023 additional species fraction GeoTIFF (trädslag)")
-    # Phase 1.3: SGU soil nationwide
     parser.add_argument("--soil-geojson", nargs="*", default=[], type=Path,
                         help="SGU Jordarter GeoJSON files for soil type nationwide")
-    # Phase 1.2: Skogliga grunddata
-    parser.add_argument("--height-raster", type=Path, default=None,
-                        help="Skogliga grunddata mean height GeoTIFF")
-    parser.add_argument("--diameter-raster", type=Path, default=None,
-                        help="Skogliga grunddata mean diameter GeoTIFF")
-    parser.add_argument("--volume-raster", type=Path, default=None,
-                        help="Skogliga grunddata total volume GeoTIFF")
     parser.add_argument("--moisture-raster", type=Path, default=None,
                         help="SLU Markfuktighet classified moisture GeoTIFF")
     args = parser.parse_args()
@@ -275,41 +291,20 @@ def main() -> None:
     forest_mask = forest_coverage > 0
     temporary_mask = (~forest_mask) & (temporary_coverage > 0)
 
-    # Read optional species fraction raster (Phase 1.1)
-    species_fractions = None
-    if args.species_fraction_raster and args.species_fraction_raster.exists():
-        print(f"  Reading species fraction raster: {args.species_fraction_raster.name}")
-        fractions = read_grid(args.species_fraction_raster, categorical=False)
-        # Compute species fractions from the fine grid
-        fine_pine = np.maximum(fractions, 0)  # assmed band 1 = pine
-        # More detailed parsing depends on the NMD trädslag layer structure
-        print("  Note: species fraction integration requires layer-specific band mapping")
-
-    # Read optional soil data (Phase 1.3)
     soil_classes = read_soil_grid(args.soil_geojson) if args.soil_geojson else None
     if soil_classes is not None:
         print("  SGU soil data loaded, refining scores with soil preference")
-        # Reduce soil to web resolution (majority class)
-        soil_web = reduce_coverage(soil_classes.astype(bool))
+        soil_web = reduce_mode(soil_classes, (1, 2, 3, 4, 5, 255))
     else:
         soil_web = None
 
-    # Read optional Skogliga grunddata (Phase 1.2)
-    moisture_data = None
     if args.moisture_raster and args.moisture_raster.exists():
         print(f"  Reading moisture raster: {args.moisture_raster.name}")
-        moisture_data = read_grid(args.moisture_raster, categorical=True)
-        moisture_web = reduce_max(moisture_data)
+        moisture_web = reduce_mode(
+            read_grid(args.moisture_raster, categorical=True), (1, 2, 3)
+        )
     else:
         moisture_web = None
-
-    diameter_data = None
-    if args.diameter_raster and args.diameter_raster.exists():
-        print(f"  Reading diameter raster: {args.diameter_raster.name}")
-        diameter_data = read_grid(args.diameter_raster, categorical=False)
-        diameter_web = reduce_mean(diameter_data)
-    else:
-        diameter_web = None
 
     # Write forest mask outputs
     Image.fromarray((forest_mask * 255).astype(np.uint8)).save(
@@ -337,19 +332,15 @@ def main() -> None:
 
         # If soil data is available, refine the score (Phase 1.3)
         if soil_web is not None and species in SOIL_PREFERENCE:
-            pref = SOIL_PREFERENCE[species]
-            soil_factor = np.choose(np.minimum(soil_web, 5), pref)
-            # Blend: 80% original score, 20% soil contribution
-            score = (score * 0.80 + score * 0.20 * soil_factor).astype(np.uint8)
+            score = apply_categorical_preference(
+                score, soil_web, SOIL_PREFERENCE[species], 0.20
+            )
 
         # If moisture data is available, refine the score (Phase 1.2)
         if moisture_web is not None and species in MOISTURE_PREFERENCE:
-            pref = MOISTURE_PREFERENCE[species]
-            moist_factor = np.zeros_like(moisture_web, dtype=np.float32)
-            for cat_idx, val in enumerate(pref, start=1):
-                moist_factor[moisture_web == cat_idx] = val
-            # Blend: 85% original score, 15% moisture contribution
-            score = (score * 0.85 + score * 0.15 * np.rint(moist_factor * 100).astype(np.uint8)).astype(np.uint8)
+            score = apply_categorical_preference(
+                score, moisture_web, [1.0, *MOISTURE_PREFERENCE[species]], 0.15
+            )
 
         score_u8 = np.rint(score * 2.55).astype(np.uint8)
         Image.fromarray(score_u8).save(
@@ -371,7 +362,7 @@ def main() -> None:
 
     metadata = {
         "model": "sweden-forest-class-v2",
-        "generated": "2026-07-31",
+        "generated": date.today().isoformat(),
         "bboxWgs84": list(SWEDEN_BBOX_WGS84),
         "width": WIDTH,
         "height": HEIGHT,
@@ -393,7 +384,8 @@ def main() -> None:
             "best": "75-100",
         },
         "limitations": [
-            "national layer does not include soil, moisture or stand continuity",
+            "stand continuity and forest age are not included",
+            "soil and moisture are included only when their optional inputs are supplied",
             "web raster is aggregated from the 10 m source",
             "small forest fragments are preserved but represented by a full web cell",
             "recent logging and fruiting weather are separate checks",
@@ -401,10 +393,8 @@ def main() -> None:
         "stats": stats,
         "inputs": {
             "baseRaster": args.base_raster.name,
-            "speciesFractionRaster": args.species_fraction_raster.name if args.species_fraction_raster else None,
             "soilGeoJson": [p.name for p in args.soil_geojson] if args.soil_geojson else [],
             "moistureRaster": args.moisture_raster.name if args.moisture_raster else None,
-            "diameterRaster": args.diameter_raster.name if args.diameter_raster else None,
         },
     }
     (args.output_dir / "metadata.json").write_text(

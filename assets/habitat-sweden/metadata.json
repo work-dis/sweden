@@ -1,6 +1,6 @@
 {
-  "model": "sweden-forest-class-v1",
-  "generated": "2026-07-29",
+  "model": "sweden-forest-class-v2",
+  "generated": "2026-08-04",
   "bboxWgs84": [
     10.4,
     55.15,
@@ -135,7 +135,8 @@
     "best": "75-100"
   },
   "limitations": [
-    "national layer does not include soil, moisture or stand continuity",
+    "stand continuity and forest age are not included",
+    "soil and moisture are included only when their optional inputs are supplied",
     "web raster is aggregated from the 10 m source",
     "small forest fragments are preserved but represented by a full web cell",
     "recent logging and fruiting weather are separate checks"
@@ -166,5 +167,10 @@
       "p90": 92.0,
       "max": 92.0
     }
+  },
+  "inputs": {
+    "baseRaster": "NMD2023bas_v2_1.tif",
+    "soilGeoJson": [],
+    "moistureRaster": null
   }
 }
