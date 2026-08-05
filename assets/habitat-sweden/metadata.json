@@ -18,7 +18,7 @@
   "height": 6000,
   "sourceCellMetres": 10,
   "preservationFactor": 2,
-  "aggregation": "nearest samples at 2x web resolution, then maximum suitability and forest presence across each 2x2 group",
+  "aggregation": "nearest samples at 2x web resolution, then maximum suitability across each 2x2 group; mixed shoreline cells are forest only when forest samples outnumber water samples",
   "webRasterMeaning": "forest-type suitability, not full habitat or occurrence probability",
   "input": "NMD2023bas_v2_1.tif",
   "forestClasses": [
@@ -42,6 +42,10 @@
   "temporaryForestClasses": [
     118,
     128
+  ],
+  "waterClasses": [
+    61,
+    62
   ],
   "classScores": {
     "cib": {

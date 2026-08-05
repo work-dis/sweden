@@ -53,6 +53,7 @@ PRESERVATION_FACTOR = 2
 
 FOREST_CLASSES = (23, 43, *range(111, 118), *range(121, 128))
 TEMPORARY_FOREST_CLASSES = (118, 128)
+WATER_CLASSES = (61, 62)
 
 # Absolute scores communicate how strongly a mapped forest class matches each
 # species. Codes 111-117 are firm-ground forest; 121-127 are wet-ground forest.
@@ -160,6 +161,26 @@ def reduce_coverage(mask: np.ndarray) -> np.ndarray:
     return mask.reshape(
         HEIGHT, PRESERVATION_FACTOR, WIDTH, PRESERVATION_FACTOR
     ).sum(axis=(1, 3))
+
+
+def classify_surface_coverage(
+    forest_coverage: np.ndarray,
+    temporary_coverage: np.ndarray,
+    water_coverage: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Resolve mixed web cells conservatively at shorelines.
+
+    A single forest sample must not paint an entire web cell when water is at
+    least as common in that cell. Inland fragments remain visible because the
+    restriction applies only to cells containing sampled water.
+    """
+    forest_mask = (forest_coverage > 0) & (forest_coverage > water_coverage)
+    temporary_mask = (
+        ~forest_mask
+        & (temporary_coverage > 0)
+        & (temporary_coverage > water_coverage)
+    )
+    return forest_mask, temporary_mask
 
 
 def reduce_mean(values: np.ndarray) -> np.ndarray:
@@ -294,10 +315,17 @@ def main() -> None:
     classes = read_grid(args.base_raster, categorical=True)
     fine_forest_mask = np.isin(classes, FOREST_CLASSES)
     fine_temporary_mask = np.isin(classes, TEMPORARY_FOREST_CLASSES)
+    fine_water_mask = np.isin(classes, WATER_CLASSES)
     forest_coverage = reduce_coverage(fine_forest_mask)
     temporary_coverage = reduce_coverage(fine_temporary_mask)
-    forest_mask = forest_coverage > 0
-    temporary_mask = (~forest_mask) & (temporary_coverage > 0)
+    water_coverage = reduce_coverage(fine_water_mask)
+    forest_mask, temporary_mask = classify_surface_coverage(
+        forest_coverage, temporary_coverage, water_coverage
+    )
+    display_forest_coverage = np.where(forest_mask, forest_coverage, 0)
+    display_temporary_coverage = np.where(
+        temporary_mask, temporary_coverage, 0
+    )
 
     soil_classes = read_soil_grid(args.soil_geojson) if args.soil_geojson else None
     if soil_classes is not None:
@@ -319,7 +347,9 @@ def main() -> None:
         args.output_dir / "forest-mask.png", compress_level=6
     )
     Image.fromarray(
-        np.rint(forest_coverage / (PRESERVATION_FACTOR**2) * 255).astype(np.uint8)
+        np.rint(
+            display_forest_coverage / (PRESERVATION_FACTOR**2) * 255
+        ).astype(np.uint8)
     ).save(args.output_dir / "forest-coverage.png", compress_level=6)
     forest_state = np.zeros(forest_mask.shape, dtype=np.uint8)
     forest_state[forest_mask] = 1
@@ -328,7 +358,9 @@ def main() -> None:
         args.output_dir / "forest-state.png", compress_level=6
     )
     Image.fromarray(
-        make_forest_reference(forest_coverage, temporary_coverage)
+        make_forest_reference(
+            display_forest_coverage, display_temporary_coverage
+        )
     ).save(
         args.output_dir / "forest-reference.png", compress_level=6
     )
@@ -337,6 +369,7 @@ def main() -> None:
     stats: dict[str, dict[str, float]] = {}
     for species, values in CLASS_SCORES.items():
         score = reduce_max(class_score(classes, values))
+        score[~forest_mask] = 0
 
         # If soil data is available, refine the score (Phase 1.3)
         if soil_web is not None and species in SOIL_PREFERENCE:
@@ -380,12 +413,14 @@ def main() -> None:
         "preservationFactor": PRESERVATION_FACTOR,
         "aggregation": (
             "nearest samples at 2x web resolution, then maximum suitability "
-            "and forest presence across each 2x2 group"
+            "across each 2x2 group; mixed shoreline cells are forest only "
+            "when forest samples outnumber water samples"
         ),
         "webRasterMeaning": "forest-type suitability, not full habitat or occurrence probability",
         "input": args.base_raster.name,
         "forestClasses": list(FOREST_CLASSES),
         "temporaryForestClasses": list(TEMPORARY_FOREST_CLASSES),
+        "waterClasses": list(WATER_CLASSES),
         "classScores": CLASS_SCORES,
         "displayBands": {
             "hidden": "<40",

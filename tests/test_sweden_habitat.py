@@ -48,6 +48,32 @@ class TestClassScores:
         result = reduce_coverage(mask)
         assert result[0, 0] == 2  # 2 of 4 subcells
 
+    def test_water_dominant_cell_is_not_displayed_as_forest(self):
+        from build_sweden_habitat import classify_surface_coverage
+
+        forest, temporary = classify_surface_coverage(
+            np.array([[1, 2, 1]], dtype=np.uint8),
+            np.array([[0, 0, 0]], dtype=np.uint8),
+            np.array([[3, 2, 0]], dtype=np.uint8),
+        )
+
+        # Water majority and a water/forest tie are both hidden. An inland
+        # fragment is preserved when no sampled water competes with it.
+        assert forest.tolist() == [[False, False, True]]
+        assert not temporary.any()
+
+    def test_water_dominant_cell_is_not_temporary_forest(self):
+        from build_sweden_habitat import classify_surface_coverage
+
+        forest, temporary = classify_surface_coverage(
+            np.zeros((1, 3), dtype=np.uint8),
+            np.array([[1, 2, 1]], dtype=np.uint8),
+            np.array([[3, 2, 0]], dtype=np.uint8),
+        )
+
+        assert not forest.any()
+        assert temporary.tolist() == [[False, False, True]]
+
     def test_reduce_mode_preserves_category(self):
         from build_sweden_habitat import reduce_mode, PRESERVATION_FACTOR, HEIGHT, WIDTH
         values = np.zeros((HEIGHT * PRESERVATION_FACTOR, WIDTH * PRESERVATION_FACTOR), dtype=np.uint8)
