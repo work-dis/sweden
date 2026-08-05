@@ -25,7 +25,7 @@ try:
     from rasterio.features import rasterize
     from rasterio.transform import from_bounds
     from rasterio.vrt import WarpedVRT
-    from rasterio.warp import Resampling
+    from rasterio.warp import Resampling, transform_bounds, transform_geom
 except ImportError as e:
     print(f"Ошибка: {e}", file=sys.stderr)
     print("Запусти через .venv: .venv/bin/python3 scripts/build_varmland_habitat.py ...", file=sys.stderr)
@@ -33,6 +33,8 @@ except ImportError as e:
 
 
 BBOX_WGS84 = (12.70, 59.25, 14.25, 59.52)
+OUTPUT_CRS = "EPSG:3857"
+OUTPUT_BOUNDS = transform_bounds("EPSG:4326", OUTPUT_CRS, *BBOX_WGS84)
 WIDTH = 1800
 HEIGHT = 720
 
@@ -74,12 +76,12 @@ def find_raster(folder: Path, hints: tuple[str, ...]) -> Path:
     raise FileNotFoundError(f"Raster not found for any of: {', '.join(hints)}")
 
 
-def read_wgs84_grid(path: Path, *, categorical: bool = False) -> np.ndarray:
+def read_output_grid(path: Path, *, categorical: bool = False) -> np.ndarray:
     with rasterio.open(path) as src:
         with WarpedVRT(
             src,
-            crs="EPSG:4326",
-            transform=from_bounds(*BBOX_WGS84, WIDTH, HEIGHT),
+            crs=OUTPUT_CRS,
+            transform=from_bounds(*OUTPUT_BOUNDS, WIDTH, HEIGHT),
             width=WIDTH,
             height=HEIGHT,
             src_nodata=src.nodata,
@@ -121,13 +123,15 @@ def read_soil_grid(paths: list[Path]) -> np.ndarray:
         for feature in collection.get("features", []):
             category = soil_category(str(feature.get("properties", {}).get("jg2_tx", "")))
             if category:
-                shapes.append((feature["geometry"], category))
+                shapes.append((transform_geom(
+                    "EPSG:4326", OUTPUT_CRS, feature["geometry"]
+                ), category))
     if not shapes:
         return np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
     return rasterize(
         shapes,
         out_shape=(HEIGHT, WIDTH),
-        transform=from_bounds(*BBOX_WGS84, WIDTH, HEIGHT),
+        transform=from_bounds(*OUTPUT_BOUNDS, WIDTH, HEIGHT),
         fill=0,
         dtype=np.uint8,
         all_touched=True,
@@ -189,7 +193,7 @@ def main() -> None:
 
     paths = {name: find_raster(args.input_dir, hints) for name, hints in FILE_HINTS.items()}
     data = {
-        name: read_wgs84_grid(path, categorical=name == "moisture")
+        name: read_output_grid(path, categorical=name == "moisture")
         for name, path in paths.items()
     }
 
@@ -276,6 +280,8 @@ def main() -> None:
         "model": "varmland-habitat-v3",
         "generated": date.today().isoformat(),
         "bboxWgs84": list(BBOX_WGS84),
+        "outputCrs": OUTPUT_CRS,
+        "outputBounds": list(OUTPUT_BOUNDS),
         "width": WIDTH,
         "height": HEIGHT,
         "cellSourceMetres": 12.5,

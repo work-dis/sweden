@@ -27,6 +27,10 @@ def validate_directory(directory: Path, names: list[str]) -> None:
     if not metadata_path.is_file() or metadata_path.stat().st_size == 0:
         raise ValueError(f"missing or empty: {metadata_path}")
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if metadata.get("outputCrs") != "EPSG:3857":
+        raise ValueError(
+            f"{metadata_path}: image overlays must use Leaflet's EPSG:3857 grid"
+        )
     expected_size = (int(metadata["width"]), int(metadata["height"]))
     for name in names:
         path = directory / f"{name}.png"

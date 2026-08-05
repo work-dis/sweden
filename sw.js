@@ -1,4 +1,4 @@
-const CACHE = 'sweden-mushrooms-v2';
+const CACHE = 'sweden-mushrooms-v4';
 const APP_URLS = [
   './',
   'index.html',

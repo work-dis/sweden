@@ -22,7 +22,7 @@ from urllib.request import Request, urlopen
 
 import numpy as np
 from PIL import Image
-from rasterio.warp import transform
+from rasterio.warp import transform, transform_bounds
 
 
 SPECIES_KEYS = {
@@ -40,6 +40,8 @@ SPECIES_NAMES = {
     "matsutake": "Мацутаке",
 }
 SWEDEN_BBOX = (10.40, 55.15, 24.30, 69.20)
+RASTER_CRS = "EPSG:3857"
+RASTER_BOUNDS = transform_bounds("EPSG:4326", RASTER_CRS, *SWEDEN_BBOX)
 GBIF_SEARCH_URL = "https://api.gbif.org/v1/occurrence/search"
 
 
@@ -63,24 +65,33 @@ class Metrics:
     k: int
 
 
-def habitat_score(lat: float, lng: float, score_img: np.ndarray) -> float | None:
-    """Look up a 0..100 habitat score using the actual image dimensions."""
-    west, south, east, north = SWEDEN_BBOX
-    height, width = score_img.shape
-    x = int((lng - west) / (east - west) * width)
-    y = int((north - lat) / (north - south) * height)
+def raster_xy(lat: float, lng: float, shape: tuple[int, int]) -> tuple[int, int] | None:
+    """Map WGS84 coordinates to the Web Mercator PNG grid used by Leaflet."""
+    height, width = shape
+    west, south, east, north = RASTER_BOUNDS
+    xs, ys = transform("EPSG:4326", RASTER_CRS, [lng], [lat])
+    x = int((xs[0] - west) / (east - west) * width)
+    y = int((north - ys[0]) / (north - south) * height)
     if x < 0 or x >= width or y < 0 or y >= height:
         return None
+    return x, y
+
+
+def habitat_score(lat: float, lng: float, score_img: np.ndarray) -> float | None:
+    """Look up a 0..100 habitat score using the actual image dimensions."""
+    pixel = raster_xy(lat, lng, score_img.shape)
+    if pixel is None:
+        return None
+    x, y = pixel
     return float(score_img[y, x]) / 255.0 * 100.0
 
 
 def raster_index(lat: float, lng: float, shape: tuple[int, int]) -> int | None:
-    west, south, east, north = SWEDEN_BBOX
-    height, width = shape
-    x = int((lng - west) / (east - west) * width)
-    y = int((north - lat) / (north - south) * height)
-    if x < 0 or x >= width or y < 0 or y >= height:
+    pixel = raster_xy(lat, lng, shape)
+    if pixel is None:
         return None
+    x, y = pixel
+    _, width = shape
     return y * width + x
 
 

@@ -88,3 +88,46 @@ class TestClassScores:
         from build_sweden_habitat import DISPLAY_BANDS
         for i in range(len(DISPLAY_BANDS) - 1):
             assert DISPLAY_BANDS[i][1] <= DISPLAY_BANDS[i+1][0]
+
+    def test_output_grid_uses_leaflet_web_mercator(self):
+        from build_sweden_habitat import OUTPUT_BOUNDS, OUTPUT_CRS, SWEDEN_BBOX_WGS84
+        from rasterio.warp import transform
+
+        assert OUTPUT_CRS == "EPSG:3857"
+        west, south, east, north = SWEDEN_BBOX_WGS84
+        xs, ys = transform("EPSG:4326", OUTPUT_CRS, [west, east], [south, north])
+        assert OUTPUT_BOUNDS == pytest.approx((xs[0], ys[0], xs[1], ys[1]))
+
+    def test_web_mercator_grid_does_not_treat_latitude_as_linear(self):
+        from build_sweden_habitat import OUTPUT_BOUNDS, OUTPUT_CRS, SWEDEN_BBOX_WGS84
+        from rasterio.warp import transform
+
+        latitude = 58.65
+        _, ys = transform("EPSG:4326", OUTPUT_CRS, [13.25], [latitude])
+        projected_ratio = (OUTPUT_BOUNDS[3] - ys[0]) / (OUTPUT_BOUNDS[3] - OUTPUT_BOUNDS[1])
+        linear_ratio = (SWEDEN_BBOX_WGS84[3] - latitude) / (
+            SWEDEN_BBOX_WGS84[3] - SWEDEN_BBOX_WGS84[1]
+        )
+        # Across Sweden the old latitude-linear placement was off by hundreds
+        # of source rows around Vanern; the projected ratios must not coincide.
+        assert abs(projected_ratio - linear_ratio) > 0.03
+
+    def test_generated_vanern_pixels_are_water(self):
+        import json
+        from pathlib import Path
+        from PIL import Image
+        from rasterio.warp import transform
+
+        directory = Path("assets/habitat-sweden")
+        metadata = json.loads((directory / "metadata.json").read_text())
+        west, south, east, north = metadata["outputBounds"]
+        width, height = metadata["width"], metadata["height"]
+        state = Image.open(directory / "forest-state.png")
+        reference = Image.open(directory / "forest-reference.png").convert("RGBA")
+
+        for lat, lng in ((58.65, 13.25), (58.85, 13.20), (58.95, 13.45)):
+            xs, ys = transform("EPSG:4326", metadata["outputCrs"], [lng], [lat])
+            x = int((xs[0] - west) / (east - west) * width)
+            y = int((north - ys[0]) / (north - south) * height)
+            assert state.getpixel((x, y)) == 0
+            assert reference.getpixel((x, y))[3] == 0

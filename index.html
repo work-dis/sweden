@@ -543,17 +543,44 @@ function loadForestMask(){
   });
   return auxiliaryImages.forest;
 }
-function rasterPixel(latlng,bounds,size){
+function rasterPixel(latlng,bounds,size,webMercator=false){
   if(!bounds.contains(latlng)) return null;
-  const west=bounds.getWest(),east=bounds.getEast();
-  const south=bounds.getSouth(),north=bounds.getNorth();
+  let xRatio,yRatio;
+  if(webMercator){
+    const northWest=L.CRS.EPSG3857.project(bounds.getNorthWest());
+    const southEast=L.CRS.EPSG3857.project(bounds.getSouthEast());
+    const point=L.CRS.EPSG3857.project(latlng);
+    xRatio=(point.x-northWest.x)/(southEast.x-northWest.x);
+    yRatio=(northWest.y-point.y)/(northWest.y-southEast.y);
+  }else{
+    const west=bounds.getWest(),east=bounds.getEast();
+    const south=bounds.getSouth(),north=bounds.getNorth();
+    xRatio=(latlng.lng-west)/(east-west);
+    yRatio=(north-latlng.lat)/(north-south);
+  }
   return {
-    x:Math.min(size.width-1,Math.max(0,Math.floor((latlng.lng-west)/(east-west)*size.width))),
-    y:Math.min(size.height-1,Math.max(0,Math.floor((north-latlng.lat)/(north-south)*size.height)))
+    x:Math.min(size.width-1,Math.max(0,Math.floor(xRatio*size.width))),
+    y:Math.min(size.height-1,Math.max(0,Math.floor(yRatio*size.height)))
   };
 }
-function habitatPixel(latlng){return rasterPixel(latlng,HABITAT_BOUNDS,HABITAT_SIZE);}
-function soilPixel(latlng){return rasterPixel(latlng,SOIL_BOUNDS,SOIL_SIZE);}
+function habitatPixel(latlng){return rasterPixel(latlng,HABITAT_BOUNDS,HABITAT_SIZE,true);}
+function soilPixel(latlng){return rasterPixel(latlng,SOIL_BOUNDS,SOIL_SIZE,true);}
+function rasterLatLng(pixel,bounds,size,webMercator=false){
+  const xRatio=(pixel.x+.5)/size.width,yRatio=(pixel.y+.5)/size.height;
+  if(webMercator){
+    const northWest=L.CRS.EPSG3857.project(bounds.getNorthWest());
+    const southEast=L.CRS.EPSG3857.project(bounds.getSouthEast());
+    return L.CRS.EPSG3857.unproject(L.point(
+      northWest.x+xRatio*(southEast.x-northWest.x),
+      northWest.y-yRatio*(northWest.y-southEast.y)
+    ));
+  }
+  return L.latLng(
+    bounds.getNorth()-yRatio*(bounds.getNorth()-bounds.getSouth()),
+    bounds.getWest()+xRatio*(bounds.getEast()-bounds.getWest())
+  );
+}
+function habitatLatLng(pixel){return rasterLatLng(pixel,HABITAT_BOUNDS,HABITAT_SIZE,true);}
 function scoreLabel(score,forestState=1){
   if(forestState===2) return 'лесная земля временно без древостоя / молодой лес';
   if(forestState!==1) return 'NMD не распознал лес';
@@ -786,22 +813,23 @@ document.getElementById('selectedFindBest').addEventListener('click',async e=>{
   try{
     const ctx=await loadScoreImage(current);
     let best={score:-1,x:pixel.x,y:pixel.y};
-    const metresPerPixelLat=(HABITAT_BOUNDS.getNorth()-HABITAT_BOUNDS.getSouth())*111320/HABITAT_SIZE.height;
-    const metresPerPixelLng=(HABITAT_BOUNDS.getEast()-HABITAT_BOUNDS.getWest())*111320*Math.cos(origin.lat*Math.PI/180)/HABITAT_SIZE.width;
-    const radius=Math.max(3,Math.round(3000/Math.max(metresPerPixelLat,metresPerPixelLng)));
-    for(let dy=-radius;dy<=radius;dy++){
-      for(let dx=-radius;dx<=radius;dx++){
-        const distance=Math.hypot(dx,dy);
-        if(distance>radius) continue;
+    const northWest=L.CRS.EPSG3857.project(HABITAT_BOUNDS.getNorthWest());
+    const southEast=L.CRS.EPSG3857.project(HABITAT_BOUNDS.getSouthEast());
+    const groundScale=Math.cos(origin.lat*Math.PI/180);
+    const metresPerPixelX=(southEast.x-northWest.x)/HABITAT_SIZE.width*groundScale;
+    const metresPerPixelY=(northWest.y-southEast.y)/HABITAT_SIZE.height*groundScale;
+    const radiusX=Math.ceil(3000/metresPerPixelX),radiusY=Math.ceil(3000/metresPerPixelY);
+    for(let dy=-radiusY;dy<=radiusY;dy++){
+      for(let dx=-radiusX;dx<=radiusX;dx++){
+        const distanceMetres=Math.hypot(dx*metresPerPixelX,dy*metresPerPixelY);
+        if(distanceMetres>3000) continue;
         const x=pixel.x+dx,y=pixel.y+dy;
         if(x<0||y<0||x>=HABITAT_SIZE.width||y>=HABITAT_SIZE.height) continue;
-        const score=ctx.getImageData(x,y,1,1).data[0]/255*100-distance*.35;
+        const score=ctx.getImageData(x,y,1,1).data[0]/255*100-distanceMetres/3000*3.15;
         if(score>best.score) best={score,x,y};
       }
     }
-    const lng=HABITAT_BOUNDS.getWest()+(best.x+.5)/HABITAT_SIZE.width*(HABITAT_BOUNDS.getEast()-HABITAT_BOUNDS.getWest());
-    const lat=HABITAT_BOUNDS.getNorth()-(best.y+.5)/HABITAT_SIZE.height*(HABITAT_BOUNDS.getNorth()-HABITAT_BOUNDS.getSouth());
-    const bestLatLng=L.latLng(lat,lng);
+    const bestLatLng=habitatLatLng(best);
     map.panTo(bestLatLng);
     selectPlace(bestLatLng,'Лучший расчётный участок в радиусе 3 км',true);
   }finally{

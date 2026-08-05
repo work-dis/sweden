@@ -32,7 +32,7 @@ try:
     from rasterio.features import rasterize
     from rasterio.transform import from_bounds
     from rasterio.vrt import WarpedVRT
-    from rasterio.warp import Resampling
+    from rasterio.warp import Resampling, transform_bounds, transform_geom
 except ImportError as e:
     print(f"Ошибка: {e}", file=sys.stderr)
     print("Запусти через .venv:", file=sys.stderr)
@@ -42,6 +42,8 @@ except ImportError as e:
 
 
 SWEDEN_BBOX_WGS84 = (10.40, 55.15, 24.30, 69.20)
+OUTPUT_CRS = "EPSG:3857"
+OUTPUT_BOUNDS = transform_bounds("EPSG:4326", OUTPUT_CRS, *SWEDEN_BBOX_WGS84)
 WIDTH = 2200
 HEIGHT = 6000
 # Sample at twice the web resolution and reduce 2 x 2 cells afterwards. Reading
@@ -125,8 +127,12 @@ def read_grid(raster: Path, *, categorical: bool = False) -> np.ndarray:
     with rasterio.open(raster) as src:
         with WarpedVRT(
             src,
-            crs="EPSG:4326",
-            transform=from_bounds(*SWEDEN_BBOX_WGS84, width, height),
+            # Leaflet's default map CRS is Web Mercator. L.imageOverlay stretches
+            # a bitmap linearly in that projected coordinate space, so the PNG
+            # must use the same grid. A latitude-linear EPSG:4326 bitmap drifts
+            # tens of kilometres north when stretched across all of Sweden.
+            crs=OUTPUT_CRS,
+            transform=from_bounds(*OUTPUT_BOUNDS, width, height),
             width=width,
             height=height,
             src_nodata=src.nodata,
@@ -255,13 +261,15 @@ def read_soil_grid(paths: list[Path]) -> np.ndarray | None:
         for feature in collection.get("features", []):
             category = soil_category(str(feature.get("properties", {}).get("jg2_tx", "")))
             if category:
-                shapes.append((feature["geometry"], category))
+                shapes.append((transform_geom(
+                    "EPSG:4326", OUTPUT_CRS, feature["geometry"]
+                ), category))
     if not shapes:
         return None
     return rasterize(
         shapes,
         out_shape=(fine_h, fine_w),
-        transform=from_bounds(*SWEDEN_BBOX_WGS84, fine_w, fine_h),
+        transform=from_bounds(*OUTPUT_BOUNDS, fine_w, fine_h),
         fill=0,
         dtype=np.uint8,
         all_touched=True,
@@ -364,6 +372,8 @@ def main() -> None:
         "model": "sweden-forest-class-v2",
         "generated": date.today().isoformat(),
         "bboxWgs84": list(SWEDEN_BBOX_WGS84),
+        "outputCrs": OUTPUT_CRS,
+        "outputBounds": list(OUTPUT_BOUNDS),
         "width": WIDTH,
         "height": HEIGHT,
         "sourceCellMetres": 10,

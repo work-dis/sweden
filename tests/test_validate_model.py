@@ -43,6 +43,17 @@ def test_habitat_score_uses_image_dimensions():
     assert habitat_score(10.0, 16.0, image) is None
 
 
+def test_raster_xy_uses_web_mercator_rows():
+    from validate_model import raster_xy, SWEDEN_BBOX
+
+    shape = (6000, 2200)
+    lat, lng = 58.65, 13.25
+    x, y = raster_xy(lat, lng, shape)
+    linear_y = int((SWEDEN_BBOX[3] - lat) / (SWEDEN_BBOX[3] - SWEDEN_BBOX[1]) * shape[0])
+    assert (x, y) == (451, 4748)
+    assert y != linear_y
+
+
 def test_parse_taxon_ids():
     from validate_model import parse_taxon_ids
     parsed = parse_taxon_ids("1,2,3,4,5")

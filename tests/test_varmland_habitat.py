@@ -50,3 +50,12 @@ class TestVarmlandLogic:
         from build_varmland_habitat import FILE_HINTS
         expected = {"pine", "spruce", "birch", "oak", "beech", "diameter", "moisture"}
         assert set(FILE_HINTS.keys()) == expected
+
+    def test_output_grid_uses_leaflet_web_mercator(self):
+        from build_varmland_habitat import OUTPUT_BOUNDS, OUTPUT_CRS, BBOX_WGS84
+        from rasterio.warp import transform
+
+        assert OUTPUT_CRS == "EPSG:3857"
+        west, south, east, north = BBOX_WGS84
+        xs, ys = transform("EPSG:4326", OUTPUT_CRS, [west, east], [south, north])
+        assert OUTPUT_BOUNDS == pytest.approx((xs[0], ys[0], xs[1], ys[1]))
